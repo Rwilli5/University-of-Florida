@@ -1,0 +1,5588 @@
+```python
+#import the libraries
+import pandas as pd
+import numpy as np
+from sklearn import preprocessing
+import matplotlib.pyplot as plt 
+```
+
+
+```python
+# Import the data
+data=pd.read_csv("UF2.csv")
+```
+
+
+```python
+# Lets begin our exploratory data analysis (EDA)
+pd.set_option('display.max_columns', None)
+print(data)
+```
+
+          Country  Year  Week Sex       D0_14        D15_64        D65_74  \
+    0         AUT  2000     1   m    7.000000    183.000000    212.000000   
+    1         AUT  2000     1   f    2.000000    104.000000    141.000000   
+    2         AUT  2000     1   b    9.000000    287.000000    353.000000   
+    3         AUT  2000     2   m    4.000000    195.000000    195.000000   
+    4         AUT  2000     2   f    6.000000    109.000000    126.000000   
+    ...       ...   ...   ...  ..         ...           ...           ...   
+    86293     USA  2020    31   f  149.227949   4881.659202   4307.605103   
+    86294     USA  2020    31   b  343.869033  12982.130967  10143.430100   
+    86295     USA  2020    32   m  164.089825   6249.758130   4733.218821   
+    86296     USA  2020    32   f  125.804828   3766.347217   3493.736971   
+    86297     USA  2020    32   b  289.894653  10016.105347   8226.955792   
+    
+                 D75_84          D85p        DTotal     R0_14    R15_64    R65_74  \
+    0        249.000000    163.000000    814.000000  0.000520  0.003513  0.037607   
+    1        338.000000    468.000000   1053.000000  0.000156  0.002002  0.019553   
+    2        587.000000    631.000000   1867.000000  0.000343  0.002759  0.027474   
+    3        259.000000    187.000000    840.000000  0.000297  0.003743  0.034591   
+    4        312.000000    509.000000   1062.000000  0.000469  0.002099  0.017473   
+    ...             ...           ...           ...       ...       ...       ...   
+    86293   6027.144693   9849.592357  22745.533107  0.000265  0.002390  0.012889   
+    86294  12580.171637  16363.398263  52413.000000  0.000299  0.003180  0.016186   
+    86295   5314.914426   5283.103714  23777.897644  0.000279  0.003064  0.016183   
+    86296   4888.391052   7988.635017  18230.102356  0.000224  0.001844  0.010454   
+    86297  10203.305478  13271.738730  42008.000000  0.000252  0.002453  0.013128   
+    
+             R75_84      R85p    RTotal  Split  SplitSex  Forecast  
+    0      0.095138  0.231834  0.010925      0         0         0  
+    1      0.061442  0.224357  0.013238      0         0         0  
+    2      0.072305  0.226242  0.012120      0         0         0  
+    3      0.098958  0.265969  0.011274      0         0         0  
+    4      0.056716  0.244012  0.013352      0         0         0  
+    ...         ...       ...       ...    ...       ...       ...  
+    86293  0.033949  0.119165  0.007108      1         1         1  
+    86294  0.039730  0.126553  0.008312      1         0         1  
+    86295  0.038209  0.113261  0.007656      1         1         1  
+    86296  0.027535  0.096650  0.005697      1         1         1  
+    86297  0.032224  0.102642  0.006662      1         0         1  
+    
+    [86298 rows x 19 columns]
+
+
+
+```python
+# Lets inspect the data for missing entries.
+data.isnull().sum()
+```
+
+
+
+
+    Country     0
+    Year        0
+    Week        0
+    Sex         0
+    D0_14       0
+    D15_64      0
+    D65_74      0
+    D75_84      0
+    D85p        0
+    DTotal      0
+    R0_14       0
+    R15_64      0
+    R65_74      0
+    R75_84      0
+    R85p        0
+    RTotal      0
+    Split       0
+    SplitSex    0
+    Forecast    0
+    dtype: int64
+
+
+
+
+```python
+# Examine Data Header to ensure all 30 countries are listed.
+data.head()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Country</th>
+      <th>Year</th>
+      <th>Week</th>
+      <th>Sex</th>
+      <th>D0_14</th>
+      <th>D15_64</th>
+      <th>D65_74</th>
+      <th>D75_84</th>
+      <th>D85p</th>
+      <th>DTotal</th>
+      <th>R0_14</th>
+      <th>R15_64</th>
+      <th>R65_74</th>
+      <th>R75_84</th>
+      <th>R85p</th>
+      <th>RTotal</th>
+      <th>Split</th>
+      <th>SplitSex</th>
+      <th>Forecast</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>AUT</td>
+      <td>2000</td>
+      <td>1</td>
+      <td>m</td>
+      <td>7.0</td>
+      <td>183.0</td>
+      <td>212.0</td>
+      <td>249.0</td>
+      <td>163.0</td>
+      <td>814.0</td>
+      <td>0.000520</td>
+      <td>0.003513</td>
+      <td>0.037607</td>
+      <td>0.095138</td>
+      <td>0.231834</td>
+      <td>0.010925</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>AUT</td>
+      <td>2000</td>
+      <td>1</td>
+      <td>f</td>
+      <td>2.0</td>
+      <td>104.0</td>
+      <td>141.0</td>
+      <td>338.0</td>
+      <td>468.0</td>
+      <td>1053.0</td>
+      <td>0.000156</td>
+      <td>0.002002</td>
+      <td>0.019553</td>
+      <td>0.061442</td>
+      <td>0.224357</td>
+      <td>0.013238</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>AUT</td>
+      <td>2000</td>
+      <td>1</td>
+      <td>b</td>
+      <td>9.0</td>
+      <td>287.0</td>
+      <td>353.0</td>
+      <td>587.0</td>
+      <td>631.0</td>
+      <td>1867.0</td>
+      <td>0.000343</td>
+      <td>0.002759</td>
+      <td>0.027474</td>
+      <td>0.072305</td>
+      <td>0.226242</td>
+      <td>0.012120</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>AUT</td>
+      <td>2000</td>
+      <td>2</td>
+      <td>m</td>
+      <td>4.0</td>
+      <td>195.0</td>
+      <td>195.0</td>
+      <td>259.0</td>
+      <td>187.0</td>
+      <td>840.0</td>
+      <td>0.000297</td>
+      <td>0.003743</td>
+      <td>0.034591</td>
+      <td>0.098958</td>
+      <td>0.265969</td>
+      <td>0.011274</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>AUT</td>
+      <td>2000</td>
+      <td>2</td>
+      <td>f</td>
+      <td>6.0</td>
+      <td>109.0</td>
+      <td>126.0</td>
+      <td>312.0</td>
+      <td>509.0</td>
+      <td>1062.0</td>
+      <td>0.000469</td>
+      <td>0.002099</td>
+      <td>0.017473</td>
+      <td>0.056716</td>
+      <td>0.244012</td>
+      <td>0.013352</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+# Examine Data Tail to ensure all 30 countries are listed.
+data.tail()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Country</th>
+      <th>Year</th>
+      <th>Week</th>
+      <th>Sex</th>
+      <th>D0_14</th>
+      <th>D15_64</th>
+      <th>D65_74</th>
+      <th>D75_84</th>
+      <th>D85p</th>
+      <th>DTotal</th>
+      <th>R0_14</th>
+      <th>R15_64</th>
+      <th>R65_74</th>
+      <th>R75_84</th>
+      <th>R85p</th>
+      <th>RTotal</th>
+      <th>Split</th>
+      <th>SplitSex</th>
+      <th>Forecast</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>86293</th>
+      <td>USA</td>
+      <td>2020</td>
+      <td>31</td>
+      <td>f</td>
+      <td>149.227949</td>
+      <td>4881.659202</td>
+      <td>4307.605103</td>
+      <td>6027.144693</td>
+      <td>9849.592357</td>
+      <td>22745.533107</td>
+      <td>0.000265</td>
+      <td>0.002390</td>
+      <td>0.012889</td>
+      <td>0.033949</td>
+      <td>0.119165</td>
+      <td>0.007108</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>86294</th>
+      <td>USA</td>
+      <td>2020</td>
+      <td>31</td>
+      <td>b</td>
+      <td>343.869033</td>
+      <td>12982.130967</td>
+      <td>10143.430100</td>
+      <td>12580.171637</td>
+      <td>16363.398263</td>
+      <td>52413.000000</td>
+      <td>0.000299</td>
+      <td>0.003180</td>
+      <td>0.016186</td>
+      <td>0.039730</td>
+      <td>0.126553</td>
+      <td>0.008312</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>86295</th>
+      <td>USA</td>
+      <td>2020</td>
+      <td>32</td>
+      <td>m</td>
+      <td>164.089825</td>
+      <td>6249.758130</td>
+      <td>4733.218821</td>
+      <td>5314.914426</td>
+      <td>5283.103714</td>
+      <td>23777.897644</td>
+      <td>0.000279</td>
+      <td>0.003064</td>
+      <td>0.016183</td>
+      <td>0.038209</td>
+      <td>0.113261</td>
+      <td>0.007656</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>86296</th>
+      <td>USA</td>
+      <td>2020</td>
+      <td>32</td>
+      <td>f</td>
+      <td>125.804828</td>
+      <td>3766.347217</td>
+      <td>3493.736971</td>
+      <td>4888.391052</td>
+      <td>7988.635017</td>
+      <td>18230.102356</td>
+      <td>0.000224</td>
+      <td>0.001844</td>
+      <td>0.010454</td>
+      <td>0.027535</td>
+      <td>0.096650</td>
+      <td>0.005697</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>86297</th>
+      <td>USA</td>
+      <td>2020</td>
+      <td>32</td>
+      <td>b</td>
+      <td>289.894653</td>
+      <td>10016.105347</td>
+      <td>8226.955792</td>
+      <td>10203.305478</td>
+      <td>13271.738730</td>
+      <td>42008.000000</td>
+      <td>0.000252</td>
+      <td>0.002453</td>
+      <td>0.013128</td>
+      <td>0.032224</td>
+      <td>0.102642</td>
+      <td>0.006662</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+# Lets examine the variable types 
+data.info()
+```
+
+    <class 'pandas.core.frame.DataFrame'>
+    RangeIndex: 86298 entries, 0 to 86297
+    Data columns (total 19 columns):
+     #   Column    Non-Null Count  Dtype  
+    ---  ------    --------------  -----  
+     0   Country   86298 non-null  object 
+     1   Year      86298 non-null  int64  
+     2   Week      86298 non-null  int64  
+     3   Sex       86298 non-null  object 
+     4   D0_14     86298 non-null  float64
+     5   D15_64    86298 non-null  float64
+     6   D65_74    86298 non-null  float64
+     7   D75_84    86298 non-null  float64
+     8   D85p      86298 non-null  float64
+     9   DTotal    86298 non-null  float64
+     10  R0_14     86298 non-null  float64
+     11  R15_64    86298 non-null  float64
+     12  R65_74    86298 non-null  float64
+     13  R75_84    86298 non-null  float64
+     14  R85p      86298 non-null  float64
+     15  RTotal    86298 non-null  float64
+     16  Split     86298 non-null  int64  
+     17  SplitSex  86298 non-null  int64  
+     18  Forecast  86298 non-null  int64  
+    dtypes: float64(12), int64(5), object(2)
+    memory usage: 12.5+ MB
+
+
+
+```python
+# Wrangle the data. Group first by Country.
+Data2 = data.groupby('Country')
+Data2.tail()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Country</th>
+      <th>Year</th>
+      <th>Week</th>
+      <th>Sex</th>
+      <th>D0_14</th>
+      <th>D15_64</th>
+      <th>D65_74</th>
+      <th>D75_84</th>
+      <th>D85p</th>
+      <th>DTotal</th>
+      <th>R0_14</th>
+      <th>R15_64</th>
+      <th>R65_74</th>
+      <th>R75_84</th>
+      <th>R85p</th>
+      <th>RTotal</th>
+      <th>Split</th>
+      <th>SplitSex</th>
+      <th>Forecast</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>3211</th>
+      <td>AUT</td>
+      <td>2020</td>
+      <td>31</td>
+      <td>f</td>
+      <td>2.717303</td>
+      <td>76.282697</td>
+      <td>95.614260</td>
+      <td>202.479053</td>
+      <td>414.906687</td>
+      <td>792.000000</td>
+      <td>0.000228</td>
+      <td>0.001369</td>
+      <td>0.010889</td>
+      <td>0.029501</td>
+      <td>0.142224</td>
+      <td>0.009191</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>3212</th>
+      <td>AUT</td>
+      <td>2020</td>
+      <td>31</td>
+      <td>b</td>
+      <td>6.220864</td>
+      <td>220.779136</td>
+      <td>236.073676</td>
+      <td>423.349128</td>
+      <td>630.577196</td>
+      <td>1517.000000</td>
+      <td>0.000253</td>
+      <td>0.001965</td>
+      <td>0.014310</td>
+      <td>0.035161</td>
+      <td>0.144506</td>
+      <td>0.008933</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>3213</th>
+      <td>AUT</td>
+      <td>2020</td>
+      <td>32</td>
+      <td>m</td>
+      <td>3.621924</td>
+      <td>149.378076</td>
+      <td>132.182778</td>
+      <td>207.855201</td>
+      <td>202.962021</td>
+      <td>696.000000</td>
+      <td>0.000286</td>
+      <td>0.002636</td>
+      <td>0.017131</td>
+      <td>0.040151</td>
+      <td>0.140324</td>
+      <td>0.008321</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>3214</th>
+      <td>AUT</td>
+      <td>2020</td>
+      <td>32</td>
+      <td>f</td>
+      <td>2.270152</td>
+      <td>63.729848</td>
+      <td>90.652510</td>
+      <td>191.971725</td>
+      <td>393.375765</td>
+      <td>742.000000</td>
+      <td>0.000191</td>
+      <td>0.001144</td>
+      <td>0.010324</td>
+      <td>0.027970</td>
+      <td>0.134843</td>
+      <td>0.008611</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>3215</th>
+      <td>AUT</td>
+      <td>2020</td>
+      <td>32</td>
+      <td>b</td>
+      <td>5.892076</td>
+      <td>213.107924</td>
+      <td>222.835288</td>
+      <td>399.826925</td>
+      <td>596.337787</td>
+      <td>1438.000000</td>
+      <td>0.000240</td>
+      <td>0.001897</td>
+      <td>0.013508</td>
+      <td>0.033208</td>
+      <td>0.136660</td>
+      <td>0.008468</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>86293</th>
+      <td>USA</td>
+      <td>2020</td>
+      <td>31</td>
+      <td>f</td>
+      <td>149.227949</td>
+      <td>4881.659202</td>
+      <td>4307.605103</td>
+      <td>6027.144693</td>
+      <td>9849.592357</td>
+      <td>22745.533107</td>
+      <td>0.000265</td>
+      <td>0.002390</td>
+      <td>0.012889</td>
+      <td>0.033949</td>
+      <td>0.119165</td>
+      <td>0.007108</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>86294</th>
+      <td>USA</td>
+      <td>2020</td>
+      <td>31</td>
+      <td>b</td>
+      <td>343.869033</td>
+      <td>12982.130967</td>
+      <td>10143.430100</td>
+      <td>12580.171637</td>
+      <td>16363.398263</td>
+      <td>52413.000000</td>
+      <td>0.000299</td>
+      <td>0.003180</td>
+      <td>0.016186</td>
+      <td>0.039730</td>
+      <td>0.126553</td>
+      <td>0.008312</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>86295</th>
+      <td>USA</td>
+      <td>2020</td>
+      <td>32</td>
+      <td>m</td>
+      <td>164.089825</td>
+      <td>6249.758130</td>
+      <td>4733.218821</td>
+      <td>5314.914426</td>
+      <td>5283.103714</td>
+      <td>23777.897644</td>
+      <td>0.000279</td>
+      <td>0.003064</td>
+      <td>0.016183</td>
+      <td>0.038209</td>
+      <td>0.113261</td>
+      <td>0.007656</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>86296</th>
+      <td>USA</td>
+      <td>2020</td>
+      <td>32</td>
+      <td>f</td>
+      <td>125.804828</td>
+      <td>3766.347217</td>
+      <td>3493.736971</td>
+      <td>4888.391052</td>
+      <td>7988.635017</td>
+      <td>18230.102356</td>
+      <td>0.000224</td>
+      <td>0.001844</td>
+      <td>0.010454</td>
+      <td>0.027535</td>
+      <td>0.096650</td>
+      <td>0.005697</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>86297</th>
+      <td>USA</td>
+      <td>2020</td>
+      <td>32</td>
+      <td>b</td>
+      <td>289.894653</td>
+      <td>10016.105347</td>
+      <td>8226.955792</td>
+      <td>10203.305478</td>
+      <td>13271.738730</td>
+      <td>42008.000000</td>
+      <td>0.000252</td>
+      <td>0.002453</td>
+      <td>0.013128</td>
+      <td>0.032224</td>
+      <td>0.102642</td>
+      <td>0.006662</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+<p>150 rows × 19 columns</p>
+</div>
+
+
+
+
+```python
+# Obtain Basic Descriptive Statitics for All 30 Countries
+Data2.describe()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead tr th {
+        text-align: left;
+    }
+
+    .dataframe thead tr:last-of-type th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr>
+      <th></th>
+      <th colspan="8" halign="left">Year</th>
+      <th colspan="8" halign="left">Week</th>
+      <th colspan="8" halign="left">D0_14</th>
+      <th colspan="8" halign="left">D15_64</th>
+      <th colspan="8" halign="left">D65_74</th>
+      <th colspan="8" halign="left">D75_84</th>
+      <th colspan="8" halign="left">D85p</th>
+      <th colspan="8" halign="left">DTotal</th>
+      <th colspan="8" halign="left">R0_14</th>
+      <th colspan="8" halign="left">R15_64</th>
+      <th colspan="8" halign="left">R65_74</th>
+      <th colspan="8" halign="left">R75_84</th>
+      <th colspan="8" halign="left">R85p</th>
+      <th colspan="8" halign="left">RTotal</th>
+      <th colspan="8" halign="left">Split</th>
+      <th colspan="8" halign="left">SplitSex</th>
+      <th colspan="8" halign="left">Forecast</th>
+    </tr>
+    <tr>
+      <th></th>
+      <th>count</th>
+      <th>mean</th>
+      <th>std</th>
+      <th>min</th>
+      <th>25%</th>
+      <th>50%</th>
+      <th>75%</th>
+      <th>max</th>
+      <th>count</th>
+      <th>mean</th>
+      <th>std</th>
+      <th>min</th>
+      <th>25%</th>
+      <th>50%</th>
+      <th>75%</th>
+      <th>max</th>
+      <th>count</th>
+      <th>mean</th>
+      <th>std</th>
+      <th>min</th>
+      <th>25%</th>
+      <th>50%</th>
+      <th>75%</th>
+      <th>max</th>
+      <th>count</th>
+      <th>mean</th>
+      <th>std</th>
+      <th>min</th>
+      <th>25%</th>
+      <th>50%</th>
+      <th>75%</th>
+      <th>max</th>
+      <th>count</th>
+      <th>mean</th>
+      <th>std</th>
+      <th>min</th>
+      <th>25%</th>
+      <th>50%</th>
+      <th>75%</th>
+      <th>max</th>
+      <th>count</th>
+      <th>mean</th>
+      <th>std</th>
+      <th>min</th>
+      <th>25%</th>
+      <th>50%</th>
+      <th>75%</th>
+      <th>max</th>
+      <th>count</th>
+      <th>mean</th>
+      <th>std</th>
+      <th>min</th>
+      <th>25%</th>
+      <th>50%</th>
+      <th>75%</th>
+      <th>max</th>
+      <th>count</th>
+      <th>mean</th>
+      <th>std</th>
+      <th>min</th>
+      <th>25%</th>
+      <th>50%</th>
+      <th>75%</th>
+      <th>max</th>
+      <th>count</th>
+      <th>mean</th>
+      <th>std</th>
+      <th>min</th>
+      <th>25%</th>
+      <th>50%</th>
+      <th>75%</th>
+      <th>max</th>
+      <th>count</th>
+      <th>mean</th>
+      <th>std</th>
+      <th>min</th>
+      <th>25%</th>
+      <th>50%</th>
+      <th>75%</th>
+      <th>max</th>
+      <th>count</th>
+      <th>mean</th>
+      <th>std</th>
+      <th>min</th>
+      <th>25%</th>
+      <th>50%</th>
+      <th>75%</th>
+      <th>max</th>
+      <th>count</th>
+      <th>mean</th>
+      <th>std</th>
+      <th>min</th>
+      <th>25%</th>
+      <th>50%</th>
+      <th>75%</th>
+      <th>max</th>
+      <th>count</th>
+      <th>mean</th>
+      <th>std</th>
+      <th>min</th>
+      <th>25%</th>
+      <th>50%</th>
+      <th>75%</th>
+      <th>max</th>
+      <th>count</th>
+      <th>mean</th>
+      <th>std</th>
+      <th>min</th>
+      <th>25%</th>
+      <th>50%</th>
+      <th>75%</th>
+      <th>max</th>
+      <th>count</th>
+      <th>mean</th>
+      <th>std</th>
+      <th>min</th>
+      <th>25%</th>
+      <th>50%</th>
+      <th>75%</th>
+      <th>max</th>
+      <th>count</th>
+      <th>mean</th>
+      <th>std</th>
+      <th>min</th>
+      <th>25%</th>
+      <th>50%</th>
+      <th>75%</th>
+      <th>max</th>
+      <th>count</th>
+      <th>mean</th>
+      <th>std</th>
+      <th>min</th>
+      <th>25%</th>
+      <th>50%</th>
+      <th>75%</th>
+      <th>max</th>
+    </tr>
+    <tr>
+      <th>Country</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>AUT</th>
+      <td>3216.0</td>
+      <td>2009.813433</td>
+      <td>5.954939</td>
+      <td>2000.0</td>
+      <td>2005.0</td>
+      <td>2010.0</td>
+      <td>2015.0</td>
+      <td>2020.0</td>
+      <td>3216.0</td>
+      <td>26.201493</td>
+      <td>14.967850</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>26.0</td>
+      <td>39.00</td>
+      <td>52.0</td>
+      <td>3216.0</td>
+      <td>5.531165</td>
+      <td>3.341140</td>
+      <td>0.000000</td>
+      <td>3.000000</td>
+      <td>5.000000</td>
+      <td>7.000000</td>
+      <td>25.000000</td>
+      <td>3216.0</td>
+      <td>165.200179</td>
+      <td>69.923094</td>
+      <td>54.000000</td>
+      <td>91.000000</td>
+      <td>164.000000</td>
+      <td>229.000000</td>
+      <td>364.000000</td>
+      <td>3216.0</td>
+      <td>164.349446</td>
+      <td>65.822275</td>
+      <td>60.000000</td>
+      <td>102.000000</td>
+      <td>152.000000</td>
+      <td>228.000000</td>
+      <td>353.000000</td>
+      <td>3216.0</td>
+      <td>298.689164</td>
+      <td>114.182952</td>
+      <td>141.000000</td>
+      <td>209.000000</td>
+      <td>243.500000</td>
+      <td>407.000000</td>
+      <td>663.000000</td>
+      <td>3216.0</td>
+      <td>360.642982</td>
+      <td>172.607319</td>
+      <td>79.000000</td>
+      <td>196.000000</td>
+      <td>365.000000</td>
+      <td>477.000000</td>
+      <td>1107.000000</td>
+      <td>3216.0</td>
+      <td>994.412935</td>
+      <td>369.235141</td>
+      <td>556.000000</td>
+      <td>709.000000</td>
+      <td>792.000000</td>
+      <td>1391.00</td>
+      <td>2340.0</td>
+      <td>3216.0</td>
+      <td>0.000335</td>
+      <td>0.000167</td>
+      <td>0.000000</td>
+      <td>0.000237</td>
+      <td>0.000323</td>
+      <td>0.000429</td>
+      <td>0.001338</td>
+      <td>3216.0</td>
+      <td>0.002278</td>
+      <td>0.000680</td>
+      <td>0.000960</td>
+      <td>0.001690</td>
+      <td>0.002251</td>
+      <td>0.002749</td>
+      <td>0.004626</td>
+      <td>3216.0</td>
+      <td>0.017059</td>
+      <td>0.005213</td>
+      <td>0.007488</td>
+      <td>0.012870</td>
+      <td>0.016321</td>
+      <td>0.020626</td>
+      <td>0.038316</td>
+      <td>3216.0</td>
+      <td>0.047809</td>
+      <td>0.011624</td>
+      <td>0.022734</td>
+      <td>0.039405</td>
+      <td>0.046438</td>
+      <td>0.054880</td>
+      <td>0.098958</td>
+      <td>3216.0</td>
+      <td>0.162015</td>
+      <td>0.027276</td>
+      <td>0.105433</td>
+      <td>0.142210</td>
+      <td>0.157538</td>
+      <td>0.175664</td>
+      <td>0.327128</td>
+      <td>3216.0</td>
+      <td>0.009219</td>
+      <td>0.000934</td>
+      <td>0.007164</td>
+      <td>0.008561</td>
+      <td>0.009049</td>
+      <td>0.009663</td>
+      <td>0.014722</td>
+      <td>3216.0</td>
+      <td>0.001866</td>
+      <td>0.04316</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>3216.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3216.0</td>
+      <td>0.126866</td>
+      <td>0.332874</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>BEL</th>
+      <td>3216.0</td>
+      <td>2009.813433</td>
+      <td>5.954939</td>
+      <td>2000.0</td>
+      <td>2005.0</td>
+      <td>2010.0</td>
+      <td>2015.0</td>
+      <td>2020.0</td>
+      <td>3216.0</td>
+      <td>26.201493</td>
+      <td>14.967850</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>26.0</td>
+      <td>39.00</td>
+      <td>52.0</td>
+      <td>3216.0</td>
+      <td>8.676617</td>
+      <td>4.711974</td>
+      <td>0.000000</td>
+      <td>5.000000</td>
+      <td>8.000000</td>
+      <td>11.000000</td>
+      <td>34.000000</td>
+      <td>3216.0</td>
+      <td>228.084577</td>
+      <td>93.150813</td>
+      <td>85.000000</td>
+      <td>131.000000</td>
+      <td>222.000000</td>
+      <td>322.000000</td>
+      <td>443.000000</td>
+      <td>3216.0</td>
+      <td>223.339552</td>
+      <td>91.710443</td>
+      <td>77.000000</td>
+      <td>138.000000</td>
+      <td>203.000000</td>
+      <td>304.000000</td>
+      <td>579.000000</td>
+      <td>3216.0</td>
+      <td>422.751244</td>
+      <td>163.324803</td>
+      <td>187.000000</td>
+      <td>300.000000</td>
+      <td>345.000000</td>
+      <td>574.250000</td>
+      <td>1223.000000</td>
+      <td>3216.0</td>
+      <td>476.479478</td>
+      <td>230.679320</td>
+      <td>115.000000</td>
+      <td>284.000000</td>
+      <td>459.000000</td>
+      <td>620.500000</td>
+      <td>2107.000000</td>
+      <td>3216.0</td>
+      <td>1359.331468</td>
+      <td>512.251307</td>
+      <td>795.000000</td>
+      <td>965.000000</td>
+      <td>1078.500000</td>
+      <td>1877.25</td>
+      <td>4281.0</td>
+      <td>3216.0</td>
+      <td>0.000365</td>
+      <td>0.000158</td>
+      <td>0.000000</td>
+      <td>0.000261</td>
+      <td>0.000352</td>
+      <td>0.000462</td>
+      <td>0.001190</td>
+      <td>3216.0</td>
+      <td>0.002506</td>
+      <td>0.000653</td>
+      <td>0.001215</td>
+      <td>0.001936</td>
+      <td>0.002496</td>
+      <td>0.002965</td>
+      <td>0.004378</td>
+      <td>3216.0</td>
+      <td>0.017794</td>
+      <td>0.005335</td>
+      <td>0.007951</td>
+      <td>0.013456</td>
+      <td>0.017124</td>
+      <td>0.021204</td>
+      <td>0.041699</td>
+      <td>3216.0</td>
+      <td>0.050314</td>
+      <td>0.012950</td>
+      <td>0.024574</td>
+      <td>0.040670</td>
+      <td>0.048454</td>
+      <td>0.057912</td>
+      <td>0.113141</td>
+      <td>3216.0</td>
+      <td>0.161194</td>
+      <td>0.033442</td>
+      <td>0.097321</td>
+      <td>0.136902</td>
+      <td>0.155618</td>
+      <td>0.178273</td>
+      <td>0.351047</td>
+      <td>3216.0</td>
+      <td>0.009748</td>
+      <td>0.001172</td>
+      <td>0.007460</td>
+      <td>0.008928</td>
+      <td>0.009557</td>
+      <td>0.010350</td>
+      <td>0.020223</td>
+      <td>3216.0</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3216.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3216.0</td>
+      <td>0.078358</td>
+      <td>0.268776</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>BGR</th>
+      <td>1659.0</td>
+      <td>2014.828210</td>
+      <td>3.075845</td>
+      <td>2010.0</td>
+      <td>2012.0</td>
+      <td>2015.0</td>
+      <td>2017.0</td>
+      <td>2020.0</td>
+      <td>1659.0</td>
+      <td>25.933092</td>
+      <td>14.913655</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>26.0</td>
+      <td>39.00</td>
+      <td>52.0</td>
+      <td>1659.0</td>
+      <td>8.888487</td>
+      <td>4.780866</td>
+      <td>0.000000</td>
+      <td>5.000000</td>
+      <td>8.000000</td>
+      <td>12.000000</td>
+      <td>32.000000</td>
+      <td>1659.0</td>
+      <td>293.592526</td>
+      <td>129.318448</td>
+      <td>97.000000</td>
+      <td>146.000000</td>
+      <td>300.000000</td>
+      <td>408.000000</td>
+      <td>633.000000</td>
+      <td>1659.0</td>
+      <td>300.905365</td>
+      <td>120.117062</td>
+      <td>123.000000</td>
+      <td>189.000000</td>
+      <td>274.000000</td>
+      <td>417.500000</td>
+      <td>681.000000</td>
+      <td>1659.0</td>
+      <td>461.784207</td>
+      <td>177.501210</td>
+      <td>214.000000</td>
+      <td>323.500000</td>
+      <td>380.000000</td>
+      <td>623.000000</td>
+      <td>1069.000000</td>
+      <td>1659.0</td>
+      <td>319.287523</td>
+      <td>137.023304</td>
+      <td>107.000000</td>
+      <td>190.500000</td>
+      <td>302.000000</td>
+      <td>431.500000</td>
+      <td>868.000000</td>
+      <td>1659.0</td>
+      <td>1384.458107</td>
+      <td>515.542775</td>
+      <td>761.000000</td>
+      <td>993.000000</td>
+      <td>1105.000000</td>
+      <td>1919.50</td>
+      <td>3222.0</td>
+      <td>1659.0</td>
+      <td>0.000693</td>
+      <td>0.000286</td>
+      <td>0.000000</td>
+      <td>0.000506</td>
+      <td>0.000648</td>
+      <td>0.000864</td>
+      <td>0.001819</td>
+      <td>1659.0</td>
+      <td>0.004811</td>
+      <td>0.001565</td>
+      <td>0.002058</td>
+      <td>0.003186</td>
+      <td>0.004777</td>
+      <td>0.006158</td>
+      <td>0.010132</td>
+      <td>1659.0</td>
+      <td>0.029416</td>
+      <td>0.009288</td>
+      <td>0.014006</td>
+      <td>0.021041</td>
+      <td>0.028200</td>
+      <td>0.037368</td>
+      <td>0.059696</td>
+      <td>1659.0</td>
+      <td>0.076270</td>
+      <td>0.014495</td>
+      <td>0.047422</td>
+      <td>0.065326</td>
+      <td>0.074920</td>
+      <td>0.085159</td>
+      <td>0.139573</td>
+      <td>1659.0</td>
+      <td>0.200699</td>
+      <td>0.030501</td>
+      <td>0.125817</td>
+      <td>0.179130</td>
+      <td>0.197438</td>
+      <td>0.217680</td>
+      <td>0.365615</td>
+      <td>1659.0</td>
+      <td>0.015054</td>
+      <td>0.001862</td>
+      <td>0.010534</td>
+      <td>0.013805</td>
+      <td>0.014881</td>
+      <td>0.016113</td>
+      <td>0.024940</td>
+      <td>1659.0</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1659.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1659.0</td>
+      <td>0.247740</td>
+      <td>0.431830</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>CHE</th>
+      <td>3213.0</td>
+      <td>2009.803922</td>
+      <td>5.949572</td>
+      <td>2000.0</td>
+      <td>2005.0</td>
+      <td>2010.0</td>
+      <td>2015.0</td>
+      <td>2020.0</td>
+      <td>3213.0</td>
+      <td>26.196078</td>
+      <td>14.973789</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>26.0</td>
+      <td>39.00</td>
+      <td>52.0</td>
+      <td>3213.0</td>
+      <td>5.611578</td>
+      <td>3.216515</td>
+      <td>0.000000</td>
+      <td>3.000000</td>
+      <td>5.000000</td>
+      <td>7.000000</td>
+      <td>20.000000</td>
+      <td>3213.0</td>
+      <td>116.591348</td>
+      <td>48.178181</td>
+      <td>37.000000</td>
+      <td>69.000000</td>
+      <td>111.000000</td>
+      <td>161.000000</td>
+      <td>255.000000</td>
+      <td>3213.0</td>
+      <td>117.165889</td>
+      <td>46.674960</td>
+      <td>35.000000</td>
+      <td>74.000000</td>
+      <td>107.000000</td>
+      <td>164.000000</td>
+      <td>246.000000</td>
+      <td>3213.0</td>
+      <td>223.998755</td>
+      <td>83.469374</td>
+      <td>107.000000</td>
+      <td>160.000000</td>
+      <td>182.000000</td>
+      <td>312.000000</td>
+      <td>483.000000</td>
+      <td>3213.0</td>
+      <td>347.703081</td>
+      <td>154.315167</td>
+      <td>104.000000</td>
+      <td>209.000000</td>
+      <td>327.000000</td>
+      <td>460.000000</td>
+      <td>964.000000</td>
+      <td>3213.0</td>
+      <td>811.070650</td>
+      <td>301.386269</td>
+      <td>457.000000</td>
+      <td>579.000000</td>
+      <td>643.000000</td>
+      <td>1128.00</td>
+      <td>1863.0</td>
+      <td>3213.0</td>
+      <td>0.000359</td>
+      <td>0.000169</td>
+      <td>0.000000</td>
+      <td>0.000249</td>
+      <td>0.000343</td>
+      <td>0.000465</td>
+      <td>0.001081</td>
+      <td>3213.0</td>
+      <td>0.001728</td>
+      <td>0.000486</td>
+      <td>0.000689</td>
+      <td>0.001350</td>
+      <td>0.001672</td>
+      <td>0.002043</td>
+      <td>0.003458</td>
+      <td>3213.0</td>
+      <td>0.013404</td>
+      <td>0.004011</td>
+      <td>0.004982</td>
+      <td>0.010282</td>
+      <td>0.012864</td>
+      <td>0.015869</td>
+      <td>0.029914</td>
+      <td>3213.0</td>
+      <td>0.040506</td>
+      <td>0.010656</td>
+      <td>0.018869</td>
+      <td>0.032399</td>
+      <td>0.038715</td>
+      <td>0.046895</td>
+      <td>0.089256</td>
+      <td>3213.0</td>
+      <td>0.159249</td>
+      <td>0.029658</td>
+      <td>0.101005</td>
+      <td>0.137683</td>
+      <td>0.154010</td>
+      <td>0.174401</td>
+      <td>0.345536</td>
+      <td>3213.0</td>
+      <td>0.008078</td>
+      <td>0.000849</td>
+      <td>0.006058</td>
+      <td>0.007463</td>
+      <td>0.007959</td>
+      <td>0.008512</td>
+      <td>0.012616</td>
+      <td>3213.0</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3213.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3213.0</td>
+      <td>0.077498</td>
+      <td>0.267421</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>CZE</th>
+      <td>2421.0</td>
+      <td>2012.267658</td>
+      <td>4.485540</td>
+      <td>2005.0</td>
+      <td>2008.0</td>
+      <td>2012.0</td>
+      <td>2016.0</td>
+      <td>2020.0</td>
+      <td>2421.0</td>
+      <td>26.081784</td>
+      <td>14.996305</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>26.0</td>
+      <td>39.00</td>
+      <td>52.0</td>
+      <td>2421.0</td>
+      <td>6.218918</td>
+      <td>3.469821</td>
+      <td>0.000000</td>
+      <td>4.000000</td>
+      <td>6.000000</td>
+      <td>8.000000</td>
+      <td>20.000000</td>
+      <td>2421.0</td>
+      <td>288.143742</td>
+      <td>129.164329</td>
+      <td>86.000000</td>
+      <td>149.000000</td>
+      <td>300.000000</td>
+      <td>381.000000</td>
+      <td>596.000000</td>
+      <td>2421.0</td>
+      <td>298.528707</td>
+      <td>122.020397</td>
+      <td>115.000000</td>
+      <td>185.000000</td>
+      <td>272.000000</td>
+      <td>402.000000</td>
+      <td>716.000000</td>
+      <td>2421.0</td>
+      <td>431.566295</td>
+      <td>164.022437</td>
+      <td>225.000000</td>
+      <td>302.000000</td>
+      <td>351.000000</td>
+      <td>588.000000</td>
+      <td>1025.000000</td>
+      <td>2421.0</td>
+      <td>359.355638</td>
+      <td>171.142209</td>
+      <td>85.000000</td>
+      <td>200.000000</td>
+      <td>360.000000</td>
+      <td>478.000000</td>
+      <td>950.000000</td>
+      <td>2421.0</td>
+      <td>1383.813300</td>
+      <td>505.539775</td>
+      <td>805.000000</td>
+      <td>1000.000000</td>
+      <td>1080.000000</td>
+      <td>1964.00</td>
+      <td>2994.0</td>
+      <td>2421.0</td>
+      <td>0.000310</td>
+      <td>0.000145</td>
+      <td>0.000000</td>
+      <td>0.000204</td>
+      <td>0.000296</td>
+      <td>0.000397</td>
+      <td>0.001022</td>
+      <td>2421.0</td>
+      <td>0.003124</td>
+      <td>0.001009</td>
+      <td>0.001338</td>
+      <td>0.002149</td>
+      <td>0.003157</td>
+      <td>0.003834</td>
+      <td>0.005661</td>
+      <td>2421.0</td>
+      <td>0.023175</td>
+      <td>0.006905</td>
+      <td>0.011046</td>
+      <td>0.017182</td>
+      <td>0.022278</td>
+      <td>0.028901</td>
+      <td>0.046130</td>
+      <td>2421.0</td>
+      <td>0.062231</td>
+      <td>0.013167</td>
+      <td>0.032403</td>
+      <td>0.052642</td>
+      <td>0.060981</td>
+      <td>0.070519</td>
+      <td>0.116578</td>
+      <td>2421.0</td>
+      <td>0.179093</td>
+      <td>0.026815</td>
+      <td>0.123316</td>
+      <td>0.160103</td>
+      <td>0.175160</td>
+      <td>0.193200</td>
+      <td>0.326464</td>
+      <td>2421.0</td>
+      <td>0.010295</td>
+      <td>0.000911</td>
+      <td>0.007906</td>
+      <td>0.009695</td>
+      <td>0.010175</td>
+      <td>0.010752</td>
+      <td>0.014738</td>
+      <td>2421.0</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>2421.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>2421.0</td>
+      <td>0.097893</td>
+      <td>0.297232</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>DEUTNP</th>
+      <td>714.0</td>
+      <td>2017.815126</td>
+      <td>1.335457</td>
+      <td>2016.0</td>
+      <td>2017.0</td>
+      <td>2018.0</td>
+      <td>2019.0</td>
+      <td>2020.0</td>
+      <td>714.0</td>
+      <td>25.113445</td>
+      <td>14.830308</td>
+      <td>1.0</td>
+      <td>12.00</td>
+      <td>24.0</td>
+      <td>38.00</td>
+      <td>52.0</td>
+      <td>714.0</td>
+      <td>47.153498</td>
+      <td>17.591615</td>
+      <td>25.042508</td>
+      <td>33.138213</td>
+      <td>39.008863</td>
+      <td>66.102843</td>
+      <td>89.296885</td>
+      <td>714.0</td>
+      <td>1716.339499</td>
+      <td>691.979888</td>
+      <td>812.526090</td>
+      <td>938.558780</td>
+      <td>1646.932889</td>
+      <td>2467.651751</td>
+      <td>3362.445592</td>
+      <td>714.0</td>
+      <td>1784.173669</td>
+      <td>699.371850</td>
+      <td>901.096783</td>
+      <td>1074.445500</td>
+      <td>1614.288062</td>
+      <td>2511.000000</td>
+      <td>3696.000000</td>
+      <td>714.0</td>
+      <td>3910.893557</td>
+      <td>1457.580340</td>
+      <td>2278.493688</td>
+      <td>2798.600722</td>
+      <td>3159.099231</td>
+      <td>5421.250000</td>
+      <td>8671.000000</td>
+      <td>714.0</td>
+      <td>4506.658263</td>
+      <td>1916.662967</td>
+      <td>1863.380218</td>
+      <td>2530.152992</td>
+      <td>4305.401729</td>
+      <td>6132.000000</td>
+      <td>10970.000000</td>
+      <td>714.0</td>
+      <td>11965.218487</td>
+      <td>4485.218902</td>
+      <td>6820.397522</td>
+      <td>8490.421163</td>
+      <td>9755.622747</td>
+      <td>16587.00</td>
+      <td>26777.0</td>
+      <td>714.0</td>
+      <td>0.000330</td>
+      <td>0.000037</td>
+      <td>0.000240</td>
+      <td>0.000304</td>
+      <td>0.000329</td>
+      <td>0.000356</td>
+      <td>0.000460</td>
+      <td>714.0</td>
+      <td>0.002489</td>
+      <td>0.000594</td>
+      <td>0.001593</td>
+      <td>0.001854</td>
+      <td>0.002466</td>
+      <td>0.003059</td>
+      <td>0.004157</td>
+      <td>714.0</td>
+      <td>0.016742</td>
+      <td>0.004185</td>
+      <td>0.010305</td>
+      <td>0.012570</td>
+      <td>0.016297</td>
+      <td>0.020472</td>
+      <td>0.030005</td>
+      <td>714.0</td>
+      <td>0.043890</td>
+      <td>0.008724</td>
+      <td>0.029995</td>
+      <td>0.037088</td>
+      <td>0.042830</td>
+      <td>0.049999</td>
+      <td>0.077907</td>
+      <td>714.0</td>
+      <td>0.155437</td>
+      <td>0.021977</td>
+      <td>0.121622</td>
+      <td>0.140230</td>
+      <td>0.151918</td>
+      <td>0.164472</td>
+      <td>0.270635</td>
+      <td>714.0</td>
+      <td>0.011320</td>
+      <td>0.001547</td>
+      <td>0.008497</td>
+      <td>0.010203</td>
+      <td>0.011184</td>
+      <td>0.012184</td>
+      <td>0.018714</td>
+      <td>714.0</td>
+      <td>1.000000</td>
+      <td>0.00000</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>714.0</td>
+      <td>0.666667</td>
+      <td>0.471735</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>714.0</td>
+      <td>0.563025</td>
+      <td>0.496360</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>DNK</th>
+      <td>2127.0</td>
+      <td>2013.325811</td>
+      <td>3.940838</td>
+      <td>2007.0</td>
+      <td>2010.0</td>
+      <td>2013.0</td>
+      <td>2017.0</td>
+      <td>2020.0</td>
+      <td>2127.0</td>
+      <td>26.057828</td>
+      <td>14.936395</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>26.0</td>
+      <td>39.00</td>
+      <td>52.0</td>
+      <td>2127.0</td>
+      <td>3.767748</td>
+      <td>2.503550</td>
+      <td>0.000000</td>
+      <td>2.000000</td>
+      <td>3.000000</td>
+      <td>5.000000</td>
+      <td>15.000000</td>
+      <td>2127.0</td>
+      <td>115.449929</td>
+      <td>48.681092</td>
+      <td>33.000000</td>
+      <td>73.000000</td>
+      <td>106.000000</td>
+      <td>152.500000</td>
+      <td>250.000000</td>
+      <td>2127.0</td>
+      <td>134.050776</td>
+      <td>51.781501</td>
+      <td>51.000000</td>
+      <td>89.000000</td>
+      <td>118.000000</td>
+      <td>188.000000</td>
+      <td>271.000000</td>
+      <td>2127.0</td>
+      <td>198.584861</td>
+      <td>74.237980</td>
+      <td>101.000000</td>
+      <td>142.000000</td>
+      <td>160.000000</td>
+      <td>274.000000</td>
+      <td>418.000000</td>
+      <td>2127.0</td>
+      <td>232.312177</td>
+      <td>95.603807</td>
+      <td>84.000000</td>
+      <td>140.000000</td>
+      <td>217.000000</td>
+      <td>320.000000</td>
+      <td>498.000000</td>
+      <td>2127.0</td>
+      <td>684.165491</td>
+      <td>250.041789</td>
+      <td>399.000000</td>
+      <td>493.000000</td>
+      <td>541.000000</td>
+      <td>961.00</td>
+      <td>1364.0</td>
+      <td>2127.0</td>
+      <td>0.000300</td>
+      <td>0.000174</td>
+      <td>0.000000</td>
+      <td>0.000203</td>
+      <td>0.000301</td>
+      <td>0.000414</td>
+      <td>0.001204</td>
+      <td>2127.0</td>
+      <td>0.002464</td>
+      <td>0.000644</td>
+      <td>0.000935</td>
+      <td>0.001990</td>
+      <td>0.002401</td>
+      <td>0.002880</td>
+      <td>0.004572</td>
+      <td>2127.0</td>
+      <td>0.018165</td>
+      <td>0.003998</td>
+      <td>0.008547</td>
+      <td>0.015164</td>
+      <td>0.017827</td>
+      <td>0.020987</td>
+      <td>0.031385</td>
+      <td>2127.0</td>
+      <td>0.051103</td>
+      <td>0.010662</td>
+      <td>0.028030</td>
+      <td>0.043356</td>
+      <td>0.049755</td>
+      <td>0.057620</td>
+      <td>0.096761</td>
+      <td>2127.0</td>
+      <td>0.160522</td>
+      <td>0.024077</td>
+      <td>0.104961</td>
+      <td>0.143235</td>
+      <td>0.155836</td>
+      <td>0.173799</td>
+      <td>0.260417</td>
+      <td>2127.0</td>
+      <td>0.009463</td>
+      <td>0.000875</td>
+      <td>0.007307</td>
+      <td>0.008830</td>
+      <td>0.009317</td>
+      <td>0.010009</td>
+      <td>0.013442</td>
+      <td>2127.0</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>2127.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>2127.0</td>
+      <td>0.046544</td>
+      <td>0.210711</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>ESP</th>
+      <td>3219.0</td>
+      <td>2009.822926</td>
+      <td>5.960275</td>
+      <td>2000.0</td>
+      <td>2005.0</td>
+      <td>2010.0</td>
+      <td>2015.0</td>
+      <td>2020.0</td>
+      <td>3219.0</td>
+      <td>26.207829</td>
+      <td>14.962310</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>26.0</td>
+      <td>39.00</td>
+      <td>52.0</td>
+      <td>3219.0</td>
+      <td>28.182189</td>
+      <td>12.924060</td>
+      <td>5.000000</td>
+      <td>18.000000</td>
+      <td>25.000000</td>
+      <td>36.000000</td>
+      <td>78.000000</td>
+      <td>3219.0</td>
+      <td>757.162968</td>
+      <td>329.213210</td>
+      <td>262.000000</td>
+      <td>363.000000</td>
+      <td>789.000000</td>
+      <td>1076.500000</td>
+      <td>1745.000000</td>
+      <td>3219.0</td>
+      <td>752.810282</td>
+      <td>331.386794</td>
+      <td>263.000000</td>
+      <td>416.000000</td>
+      <td>732.000000</td>
+      <td>1012.000000</td>
+      <td>2714.000000</td>
+      <td>3219.0</td>
+      <td>1538.531357</td>
+      <td>605.874634</td>
+      <td>733.000000</td>
+      <td>1078.000000</td>
+      <td>1256.000000</td>
+      <td>2089.000000</td>
+      <td>5775.876800</td>
+      <td>3219.0</td>
+      <td>1934.227773</td>
+      <td>962.978456</td>
+      <td>563.000000</td>
+      <td>1210.000000</td>
+      <td>1799.000000</td>
+      <td>2473.000000</td>
+      <td>10547.428316</td>
+      <td>3219.0</td>
+      <td>5010.914570</td>
+      <td>1961.281566</td>
+      <td>2636.000000</td>
+      <td>3523.000000</td>
+      <td>3989.000000</td>
+      <td>6791.50</td>
+      <td>20654.0</td>
+      <td>3219.0</td>
+      <td>0.000333</td>
+      <td>0.000109</td>
+      <td>0.000076</td>
+      <td>0.000249</td>
+      <td>0.000323</td>
+      <td>0.000410</td>
+      <td>0.000799</td>
+      <td>3219.0</td>
+      <td>0.001940</td>
+      <td>0.000638</td>
+      <td>0.000958</td>
+      <td>0.001256</td>
+      <td>0.001927</td>
+      <td>0.002436</td>
+      <td>0.003990</td>
+      <td>3219.0</td>
+      <td>0.014839</td>
+      <td>0.005542</td>
+      <td>0.006035</td>
+      <td>0.010190</td>
+      <td>0.014355</td>
+      <td>0.018425</td>
+      <td>0.044273</td>
+      <td>3219.0</td>
+      <td>0.044258</td>
+      <td>0.012580</td>
+      <td>0.021736</td>
+      <td>0.034813</td>
+      <td>0.042507</td>
+      <td>0.052098</td>
+      <td>0.138748</td>
+      <td>3219.0</td>
+      <td>0.146287</td>
+      <td>0.029881</td>
+      <td>0.092133</td>
+      <td>0.125689</td>
+      <td>0.140664</td>
+      <td>0.160936</td>
+      <td>0.407945</td>
+      <td>3219.0</td>
+      <td>0.008675</td>
+      <td>0.001330</td>
+      <td>0.006416</td>
+      <td>0.007846</td>
+      <td>0.008414</td>
+      <td>0.009203</td>
+      <td>0.023794</td>
+      <td>3219.0</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3219.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3219.0</td>
+      <td>0.079217</td>
+      <td>0.270119</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>EST</th>
+      <td>3219.0</td>
+      <td>2009.822926</td>
+      <td>5.960275</td>
+      <td>2000.0</td>
+      <td>2005.0</td>
+      <td>2010.0</td>
+      <td>2015.0</td>
+      <td>2020.0</td>
+      <td>3219.0</td>
+      <td>26.207829</td>
+      <td>14.962310</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>26.0</td>
+      <td>39.00</td>
+      <td>52.0</td>
+      <td>3219.0</td>
+      <td>1.312860</td>
+      <td>1.405546</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>1.000000</td>
+      <td>2.000000</td>
+      <td>9.057471</td>
+      <td>3219.0</td>
+      <td>54.381534</td>
+      <td>29.658354</td>
+      <td>5.000000</td>
+      <td>27.000000</td>
+      <td>52.000000</td>
+      <td>74.000000</td>
+      <td>157.156077</td>
+      <td>3219.0</td>
+      <td>44.754746</td>
+      <td>20.451452</td>
+      <td>9.000000</td>
+      <td>29.000000</td>
+      <td>41.000000</td>
+      <td>57.000000</td>
+      <td>143.476760</td>
+      <td>3219.0</td>
+      <td>61.829146</td>
+      <td>25.381016</td>
+      <td>16.338028</td>
+      <td>42.000000</td>
+      <td>55.000000</td>
+      <td>83.259214</td>
+      <td>142.000000</td>
+      <td>3219.0</td>
+      <td>48.448648</td>
+      <td>26.958570</td>
+      <td>3.049724</td>
+      <td>21.000000</td>
+      <td>50.094203</td>
+      <td>67.000000</td>
+      <td>150.000000</td>
+      <td>3219.0</td>
+      <td>210.726934</td>
+      <td>79.981689</td>
+      <td>96.000000</td>
+      <td>149.000000</td>
+      <td>172.000000</td>
+      <td>286.50</td>
+      <td>480.0</td>
+      <td>3219.0</td>
+      <td>0.000476</td>
+      <td>0.000488</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000476</td>
+      <td>0.000769</td>
+      <td>0.002916</td>
+      <td>3219.0</td>
+      <td>0.004755</td>
+      <td>0.002243</td>
+      <td>0.000622</td>
+      <td>0.002933</td>
+      <td>0.004408</td>
+      <td>0.006113</td>
+      <td>0.012788</td>
+      <td>3219.0</td>
+      <td>0.028544</td>
+      <td>0.012731</td>
+      <td>0.005650</td>
+      <td>0.018747</td>
+      <td>0.025974</td>
+      <td>0.036411</td>
+      <td>0.078109</td>
+      <td>3219.0</td>
+      <td>0.064751</td>
+      <td>0.020171</td>
+      <td>0.024748</td>
+      <td>0.049968</td>
+      <td>0.061673</td>
+      <td>0.076014</td>
+      <td>0.159659</td>
+      <td>3219.0</td>
+      <td>0.174675</td>
+      <td>0.047741</td>
+      <td>0.046252</td>
+      <td>0.142187</td>
+      <td>0.166367</td>
+      <td>0.199966</td>
+      <td>0.438677</td>
+      <td>3219.0</td>
+      <td>0.012289</td>
+      <td>0.001664</td>
+      <td>0.008110</td>
+      <td>0.011096</td>
+      <td>0.012080</td>
+      <td>0.013308</td>
+      <td>0.018754</td>
+      <td>3219.0</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3219.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3219.0</td>
+      <td>0.127679</td>
+      <td>0.333784</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>FIN</th>
+      <td>4776.0</td>
+      <td>2004.811558</td>
+      <td>8.840772</td>
+      <td>1990.0</td>
+      <td>1997.0</td>
+      <td>2005.0</td>
+      <td>2012.0</td>
+      <td>2020.0</td>
+      <td>4776.0</td>
+      <td>26.298995</td>
+      <td>14.981741</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>26.0</td>
+      <td>39.00</td>
+      <td>52.0</td>
+      <td>4776.0</td>
+      <td>3.974037</td>
+      <td>3.095167</td>
+      <td>0.000000</td>
+      <td>2.000000</td>
+      <td>3.000000</td>
+      <td>5.000000</td>
+      <td>50.000000</td>
+      <td>4776.0</td>
+      <td>128.935511</td>
+      <td>59.762928</td>
+      <td>28.000000</td>
+      <td>64.000000</td>
+      <td>137.000000</td>
+      <td>179.000000</td>
+      <td>316.000000</td>
+      <td>4776.0</td>
+      <td>119.978224</td>
+      <td>49.910243</td>
+      <td>35.000000</td>
+      <td>77.000000</td>
+      <td>112.000000</td>
+      <td>161.000000</td>
+      <td>275.000000</td>
+      <td>4776.0</td>
+      <td>195.698492</td>
+      <td>74.385876</td>
+      <td>77.000000</td>
+      <td>137.000000</td>
+      <td>160.000000</td>
+      <td>271.000000</td>
+      <td>486.000000</td>
+      <td>4776.0</td>
+      <td>194.430486</td>
+      <td>100.980204</td>
+      <td>32.000000</td>
+      <td>109.000000</td>
+      <td>189.000000</td>
+      <td>258.000000</td>
+      <td>605.000000</td>
+      <td>4776.0</td>
+      <td>643.016750</td>
+      <td>235.836559</td>
+      <td>286.000000</td>
+      <td>464.000000</td>
+      <td>508.000000</td>
+      <td>903.00</td>
+      <td>1335.0</td>
+      <td>4776.0</td>
+      <td>0.000332</td>
+      <td>0.000226</td>
+      <td>0.000000</td>
+      <td>0.000174</td>
+      <td>0.000315</td>
+      <td>0.000451</td>
+      <td>0.002917</td>
+      <td>4776.0</td>
+      <td>0.002897</td>
+      <td>0.001060</td>
+      <td>0.000871</td>
+      <td>0.001948</td>
+      <td>0.002887</td>
+      <td>0.003646</td>
+      <td>0.005998</td>
+      <td>4776.0</td>
+      <td>0.020063</td>
+      <td>0.008014</td>
+      <td>0.005173</td>
+      <td>0.014182</td>
+      <td>0.018651</td>
+      <td>0.024389</td>
+      <td>0.050934</td>
+      <td>4776.0</td>
+      <td>0.056528</td>
+      <td>0.017807</td>
+      <td>0.018745</td>
+      <td>0.043116</td>
+      <td>0.053866</td>
+      <td>0.066580</td>
+      <td>0.151568</td>
+      <td>4776.0</td>
+      <td>0.167362</td>
+      <td>0.032489</td>
+      <td>0.070980</td>
+      <td>0.144885</td>
+      <td>0.161677</td>
+      <td>0.182727</td>
+      <td>0.379409</td>
+      <td>4776.0</td>
+      <td>0.009520</td>
+      <td>0.000859</td>
+      <td>0.005330</td>
+      <td>0.008946</td>
+      <td>0.009420</td>
+      <td>0.009991</td>
+      <td>0.014221</td>
+      <td>4776.0</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>4776.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>4776.0</td>
+      <td>0.052764</td>
+      <td>0.223585</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>FRATNP</th>
+      <td>3195.0</td>
+      <td>2009.746479</td>
+      <td>5.916732</td>
+      <td>2000.0</td>
+      <td>2005.0</td>
+      <td>2010.0</td>
+      <td>2015.0</td>
+      <td>2020.0</td>
+      <td>3195.0</td>
+      <td>26.183099</td>
+      <td>15.014373</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>26.0</td>
+      <td>39.00</td>
+      <td>52.0</td>
+      <td>3195.0</td>
+      <td>53.337026</td>
+      <td>21.881251</td>
+      <td>17.000000</td>
+      <td>36.000000</td>
+      <td>46.000000</td>
+      <td>71.000000</td>
+      <td>129.000000</td>
+      <td>3195.0</td>
+      <td>1294.498676</td>
+      <td>549.244240</td>
+      <td>493.000000</td>
+      <td>644.540295</td>
+      <td>1340.000000</td>
+      <td>1861.723006</td>
+      <td>2716.084914</td>
+      <td>3195.0</td>
+      <td>1041.139950</td>
+      <td>439.401934</td>
+      <td>374.082488</td>
+      <td>594.058315</td>
+      <td>1006.000000</td>
+      <td>1409.000000</td>
+      <td>2662.365887</td>
+      <td>3195.0</td>
+      <td>1909.104418</td>
+      <td>728.215542</td>
+      <td>955.000000</td>
+      <td>1356.000000</td>
+      <td>1562.000000</td>
+      <td>2611.500000</td>
+      <td>5341.293816</td>
+      <td>3195.0</td>
+      <td>2758.192231</td>
+      <td>1306.859755</td>
+      <td>777.000000</td>
+      <td>1685.307821</td>
+      <td>2601.000000</td>
+      <td>3557.500000</td>
+      <td>9398.768173</td>
+      <td>3195.0</td>
+      <td>7056.272300</td>
+      <td>2642.833186</td>
+      <td>3986.000000</td>
+      <td>5028.500000</td>
+      <td>5570.000000</td>
+      <td>9752.00</td>
+      <td>18759.0</td>
+      <td>3195.0</td>
+      <td>0.000363</td>
+      <td>0.000081</td>
+      <td>0.000158</td>
+      <td>0.000306</td>
+      <td>0.000352</td>
+      <td>0.000410</td>
+      <td>0.000736</td>
+      <td>3195.0</td>
+      <td>0.002528</td>
+      <td>0.000794</td>
+      <td>0.001265</td>
+      <td>0.001654</td>
+      <td>0.002538</td>
+      <td>0.003259</td>
+      <td>0.005045</td>
+      <td>3195.0</td>
+      <td>0.014942</td>
+      <td>0.005158</td>
+      <td>0.007125</td>
+      <td>0.010276</td>
+      <td>0.014240</td>
+      <td>0.018336</td>
+      <td>0.034588</td>
+      <td>3195.0</td>
+      <td>0.040590</td>
+      <td>0.011215</td>
+      <td>0.021878</td>
+      <td>0.031744</td>
+      <td>0.038802</td>
+      <td>0.047551</td>
+      <td>0.092588</td>
+      <td>3195.0</td>
+      <td>0.142509</td>
+      <td>0.028599</td>
+      <td>0.092562</td>
+      <td>0.122031</td>
+      <td>0.137329</td>
+      <td>0.157221</td>
+      <td>0.328682</td>
+      <td>3195.0</td>
+      <td>0.008805</td>
+      <td>0.001005</td>
+      <td>0.006574</td>
+      <td>0.008153</td>
+      <td>0.008655</td>
+      <td>0.009291</td>
+      <td>0.016323</td>
+      <td>3195.0</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3195.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3195.0</td>
+      <td>0.121127</td>
+      <td>0.326326</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>GBRTENW</th>
+      <td>1659.0</td>
+      <td>2014.828210</td>
+      <td>3.075845</td>
+      <td>2010.0</td>
+      <td>2012.0</td>
+      <td>2015.0</td>
+      <td>2017.0</td>
+      <td>2020.0</td>
+      <td>1659.0</td>
+      <td>25.933092</td>
+      <td>14.913655</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>26.0</td>
+      <td>39.00</td>
+      <td>52.0</td>
+      <td>1659.0</td>
+      <td>48.982520</td>
+      <td>19.832296</td>
+      <td>14.000000</td>
+      <td>33.000000</td>
+      <td>42.000000</td>
+      <td>66.000000</td>
+      <td>108.000000</td>
+      <td>1659.0</td>
+      <td>997.973478</td>
+      <td>394.524452</td>
+      <td>388.000000</td>
+      <td>619.000000</td>
+      <td>905.000000</td>
+      <td>1423.500000</td>
+      <td>2687.000000</td>
+      <td>1659.0</td>
+      <td>1089.611814</td>
+      <td>431.766476</td>
+      <td>443.000000</td>
+      <td>715.500000</td>
+      <td>944.000000</td>
+      <td>1516.000000</td>
+      <td>3380.000000</td>
+      <td>1659.0</td>
+      <td>1923.106691</td>
+      <td>755.955351</td>
+      <td>897.000000</td>
+      <td>1353.000000</td>
+      <td>1551.000000</td>
+      <td>2623.000000</td>
+      <td>6657.000000</td>
+      <td>1659.0</td>
+      <td>2605.116335</td>
+      <td>1153.269039</td>
+      <td>915.000000</td>
+      <td>1608.000000</td>
+      <td>2331.000000</td>
+      <td>3461.000000</td>
+      <td>9601.000000</td>
+      <td>1659.0</td>
+      <td>6664.790838</td>
+      <td>2615.516237</td>
+      <td>3203.000000</td>
+      <td>4661.000000</td>
+      <td>5310.000000</td>
+      <td>9094.50</td>
+      <td>22351.0</td>
+      <td>1659.0</td>
+      <td>0.000371</td>
+      <td>0.000080</td>
+      <td>0.000140</td>
+      <td>0.000315</td>
+      <td>0.000367</td>
+      <td>0.000419</td>
+      <td>0.000630</td>
+      <td>1659.0</td>
+      <td>0.002094</td>
+      <td>0.000437</td>
+      <td>0.001076</td>
+      <td>0.001707</td>
+      <td>0.002067</td>
+      <td>0.002433</td>
+      <td>0.004674</td>
+      <td>1659.0</td>
+      <td>0.015530</td>
+      <td>0.003269</td>
+      <td>0.008309</td>
+      <td>0.012861</td>
+      <td>0.015305</td>
+      <td>0.017729</td>
+      <td>0.037579</td>
+      <td>1659.0</td>
+      <td>0.045562</td>
+      <td>0.009109</td>
+      <td>0.025824</td>
+      <td>0.039113</td>
+      <td>0.044736</td>
+      <td>0.050886</td>
+      <td>0.115549</td>
+      <td>1659.0</td>
+      <td>0.150153</td>
+      <td>0.028628</td>
+      <td>0.096667</td>
+      <td>0.131169</td>
+      <td>0.144231</td>
+      <td>0.162868</td>
+      <td>0.368557</td>
+      <td>1659.0</td>
+      <td>0.009003</td>
+      <td>0.001385</td>
+      <td>0.005969</td>
+      <td>0.008141</td>
+      <td>0.008744</td>
+      <td>0.009497</td>
+      <td>0.020266</td>
+      <td>1659.0</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1659.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1659.0</td>
+      <td>0.247740</td>
+      <td>0.431830</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>GBR_SCO</th>
+      <td>3213.0</td>
+      <td>2009.822596</td>
+      <td>5.950158</td>
+      <td>2000.0</td>
+      <td>2005.0</td>
+      <td>2010.0</td>
+      <td>2015.0</td>
+      <td>2020.0</td>
+      <td>3213.0</td>
+      <td>26.225023</td>
+      <td>14.955000</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>26.0</td>
+      <td>39.00</td>
+      <td>52.0</td>
+      <td>3213.0</td>
+      <td>4.257081</td>
+      <td>2.776976</td>
+      <td>0.000000</td>
+      <td>2.000000</td>
+      <td>4.000000</td>
+      <td>6.000000</td>
+      <td>19.000000</td>
+      <td>3213.0</td>
+      <td>137.142857</td>
+      <td>55.487894</td>
+      <td>50.000000</td>
+      <td>86.000000</td>
+      <td>126.000000</td>
+      <td>191.000000</td>
+      <td>351.000000</td>
+      <td>3213.0</td>
+      <td>139.292250</td>
+      <td>54.802852</td>
+      <td>54.000000</td>
+      <td>95.000000</td>
+      <td>118.000000</td>
+      <td>190.000000</td>
+      <td>429.000000</td>
+      <td>3213.0</td>
+      <td>224.385310</td>
+      <td>86.166700</td>
+      <td>114.000000</td>
+      <td>158.000000</td>
+      <td>181.000000</td>
+      <td>307.000000</td>
+      <td>641.000000</td>
+      <td>3213.0</td>
+      <td>216.220977</td>
+      <td>99.642742</td>
+      <td>53.000000</td>
+      <td>125.000000</td>
+      <td>209.000000</td>
+      <td>288.000000</td>
+      <td>751.000000</td>
+      <td>3213.0</td>
+      <td>721.298475</td>
+      <td>273.051988</td>
+      <td>399.000000</td>
+      <td>511.000000</td>
+      <td>571.000000</td>
+      <td>1000.00</td>
+      <td>1978.0</td>
+      <td>3213.0</td>
+      <td>0.000381</td>
+      <td>0.000214</td>
+      <td>0.000000</td>
+      <td>0.000238</td>
+      <td>0.000361</td>
+      <td>0.000494</td>
+      <td>0.001522</td>
+      <td>3213.0</td>
+      <td>0.003092</td>
+      <td>0.000772</td>
+      <td>0.001443</td>
+      <td>0.002487</td>
+      <td>0.003033</td>
+      <td>0.003611</td>
+      <td>0.006795</td>
+      <td>3213.0</td>
+      <td>0.022304</td>
+      <td>0.005850</td>
+      <td>0.010048</td>
+      <td>0.018060</td>
+      <td>0.021331</td>
+      <td>0.025687</td>
+      <td>0.062131</td>
+      <td>3213.0</td>
+      <td>0.059490</td>
+      <td>0.012811</td>
+      <td>0.032658</td>
+      <td>0.050282</td>
+      <td>0.057554</td>
+      <td>0.066601</td>
+      <td>0.142594</td>
+      <td>3213.0</td>
+      <td>0.167274</td>
+      <td>0.030658</td>
+      <td>0.098187</td>
+      <td>0.146183</td>
+      <td>0.161795</td>
+      <td>0.182373</td>
+      <td>0.362557</td>
+      <td>3213.0</td>
+      <td>0.010730</td>
+      <td>0.001369</td>
+      <td>0.007850</td>
+      <td>0.009837</td>
+      <td>0.010511</td>
+      <td>0.011304</td>
+      <td>0.020754</td>
+      <td>3213.0</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3213.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3213.0</td>
+      <td>0.126984</td>
+      <td>0.333007</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>HRV</th>
+      <td>2964.0</td>
+      <td>2010.000000</td>
+      <td>5.478150</td>
+      <td>2001.0</td>
+      <td>2005.0</td>
+      <td>2010.0</td>
+      <td>2015.0</td>
+      <td>2019.0</td>
+      <td>2964.0</td>
+      <td>26.500000</td>
+      <td>15.010863</td>
+      <td>1.0</td>
+      <td>13.75</td>
+      <td>26.5</td>
+      <td>39.25</td>
+      <td>52.0</td>
+      <td>2964.0</td>
+      <td>3.794946</td>
+      <td>2.644291</td>
+      <td>0.000000</td>
+      <td>2.000000</td>
+      <td>3.000000</td>
+      <td>5.000000</td>
+      <td>19.021142</td>
+      <td>2964.0</td>
+      <td>128.710616</td>
+      <td>58.670480</td>
+      <td>32.000000</td>
+      <td>63.000000</td>
+      <td>136.000000</td>
+      <td>177.000000</td>
+      <td>269.000000</td>
+      <td>2964.0</td>
+      <td>145.742404</td>
+      <td>63.227286</td>
+      <td>47.000000</td>
+      <td>97.000000</td>
+      <td>131.270882</td>
+      <td>186.428884</td>
+      <td>379.000000</td>
+      <td>2964.0</td>
+      <td>237.702326</td>
+      <td>93.376378</td>
+      <td>80.000000</td>
+      <td>165.000000</td>
+      <td>201.000000</td>
+      <td>323.000000</td>
+      <td>603.000000</td>
+      <td>2964.0</td>
+      <td>143.793973</td>
+      <td>77.141803</td>
+      <td>23.000000</td>
+      <td>77.000000</td>
+      <td>138.000000</td>
+      <td>192.000000</td>
+      <td>531.000000</td>
+      <td>2964.0</td>
+      <td>659.744265</td>
+      <td>244.425052</td>
+      <td>342.000000</td>
+      <td>472.750000</td>
+      <td>523.000000</td>
+      <td>919.00</td>
+      <td>1621.0</td>
+      <td>2964.0</td>
+      <td>0.000449</td>
+      <td>0.000269</td>
+      <td>0.000000</td>
+      <td>0.000282</td>
+      <td>0.000437</td>
+      <td>0.000614</td>
+      <td>0.001826</td>
+      <td>2964.0</td>
+      <td>0.003548</td>
+      <td>0.001277</td>
+      <td>0.001243</td>
+      <td>0.002302</td>
+      <td>0.003542</td>
+      <td>0.004563</td>
+      <td>0.007163</td>
+      <td>2964.0</td>
+      <td>0.026364</td>
+      <td>0.008972</td>
+      <td>0.009800</td>
+      <td>0.019344</td>
+      <td>0.025032</td>
+      <td>0.032441</td>
+      <td>0.058469</td>
+      <td>2964.0</td>
+      <td>0.072073</td>
+      <td>0.015565</td>
+      <td>0.037417</td>
+      <td>0.060590</td>
+      <td>0.070331</td>
+      <td>0.081375</td>
+      <td>0.146006</td>
+      <td>2964.0</td>
+      <td>0.195199</td>
+      <td>0.036878</td>
+      <td>0.106738</td>
+      <td>0.169714</td>
+      <td>0.189362</td>
+      <td>0.215492</td>
+      <td>0.370104</td>
+      <td>2964.0</td>
+      <td>0.012119</td>
+      <td>0.001362</td>
+      <td>0.007949</td>
+      <td>0.011212</td>
+      <td>0.012017</td>
+      <td>0.012836</td>
+      <td>0.021764</td>
+      <td>2964.0</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>2964.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>2964.0</td>
+      <td>0.052632</td>
+      <td>0.223335</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>HUN</th>
+      <td>3210.0</td>
+      <td>2009.794393</td>
+      <td>5.944175</td>
+      <td>2000.0</td>
+      <td>2005.0</td>
+      <td>2010.0</td>
+      <td>2015.0</td>
+      <td>2020.0</td>
+      <td>3210.0</td>
+      <td>26.191589</td>
+      <td>14.980065</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>26.0</td>
+      <td>39.00</td>
+      <td>52.0</td>
+      <td>3210.0</td>
+      <td>9.692418</td>
+      <td>5.589241</td>
+      <td>0.000000</td>
+      <td>6.000000</td>
+      <td>8.006425</td>
+      <td>13.000000</td>
+      <td>36.000000</td>
+      <td>3210.0</td>
+      <td>439.266091</td>
+      <td>195.481289</td>
+      <td>124.000000</td>
+      <td>230.000000</td>
+      <td>454.681310</td>
+      <td>588.000000</td>
+      <td>991.000000</td>
+      <td>3210.0</td>
+      <td>366.542236</td>
+      <td>141.882810</td>
+      <td>159.000000</td>
+      <td>246.250000</td>
+      <td>317.000000</td>
+      <td>506.198529</td>
+      <td>887.000000</td>
+      <td>3210.0</td>
+      <td>505.674667</td>
+      <td>195.842329</td>
+      <td>226.220273</td>
+      <td>345.000000</td>
+      <td>426.000000</td>
+      <td>691.000000</td>
+      <td>1178.000000</td>
+      <td>3210.0</td>
+      <td>352.124276</td>
+      <td>172.695767</td>
+      <td>82.000000</td>
+      <td>178.000000</td>
+      <td>356.000000</td>
+      <td>472.000000</td>
+      <td>1038.000000</td>
+      <td>3210.0</td>
+      <td>1673.299688</td>
+      <td>616.714261</td>
+      <td>979.000000</td>
+      <td>1207.000000</td>
+      <td>1324.500000</td>
+      <td>2350.50</td>
+      <td>3961.0</td>
+      <td>3210.0</td>
+      <td>0.000496</td>
+      <td>0.000206</td>
+      <td>0.000000</td>
+      <td>0.000353</td>
+      <td>0.000482</td>
+      <td>0.000620</td>
+      <td>0.001480</td>
+      <td>3210.0</td>
+      <td>0.005060</td>
+      <td>0.001682</td>
+      <td>0.001949</td>
+      <td>0.003413</td>
+      <td>0.005066</td>
+      <td>0.006243</td>
+      <td>0.010287</td>
+      <td>3210.0</td>
+      <td>0.031047</td>
+      <td>0.009940</td>
+      <td>0.013821</td>
+      <td>0.022697</td>
+      <td>0.029269</td>
+      <td>0.038524</td>
+      <td>0.070694</td>
+      <td>3210.0</td>
+      <td>0.073384</td>
+      <td>0.015851</td>
+      <td>0.040817</td>
+      <td>0.061424</td>
+      <td>0.071156</td>
+      <td>0.084016</td>
+      <td>0.155924</td>
+      <td>3210.0</td>
+      <td>0.187721</td>
+      <td>0.032386</td>
+      <td>0.114980</td>
+      <td>0.165314</td>
+      <td>0.183862</td>
+      <td>0.204493</td>
+      <td>0.411944</td>
+      <td>3210.0</td>
+      <td>0.013128</td>
+      <td>0.001421</td>
+      <td>0.009815</td>
+      <td>0.012143</td>
+      <td>0.013011</td>
+      <td>0.013910</td>
+      <td>0.020876</td>
+      <td>3210.0</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3210.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3210.0</td>
+      <td>0.271028</td>
+      <td>0.444560</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>ISL</th>
+      <td>3219.0</td>
+      <td>2009.822926</td>
+      <td>5.960275</td>
+      <td>2000.0</td>
+      <td>2005.0</td>
+      <td>2010.0</td>
+      <td>2015.0</td>
+      <td>2020.0</td>
+      <td>3219.0</td>
+      <td>26.207829</td>
+      <td>14.962310</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>26.0</td>
+      <td>39.00</td>
+      <td>52.0</td>
+      <td>3219.0</td>
+      <td>0.201926</td>
+      <td>0.448306</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>4.000000</td>
+      <td>3219.0</td>
+      <td>4.334265</td>
+      <td>2.723783</td>
+      <td>0.000000</td>
+      <td>2.000000</td>
+      <td>4.000000</td>
+      <td>6.000000</td>
+      <td>17.000000</td>
+      <td>3219.0</td>
+      <td>4.052811</td>
+      <td>2.545241</td>
+      <td>0.000000</td>
+      <td>2.000000</td>
+      <td>4.000000</td>
+      <td>6.000000</td>
+      <td>16.000000</td>
+      <td>3219.0</td>
+      <td>7.711090</td>
+      <td>3.927296</td>
+      <td>0.000000</td>
+      <td>5.000000</td>
+      <td>7.000000</td>
+      <td>10.000000</td>
+      <td>25.000000</td>
+      <td>3219.0</td>
+      <td>9.416589</td>
+      <td>5.076431</td>
+      <td>0.000000</td>
+      <td>6.000000</td>
+      <td>8.000000</td>
+      <td>12.000000</td>
+      <td>32.000000</td>
+      <td>3219.0</td>
+      <td>25.716682</td>
+      <td>10.857539</td>
+      <td>2.000000</td>
+      <td>17.000000</td>
+      <td>22.000000</td>
+      <td>34.00</td>
+      <td>62.0</td>
+      <td>3219.0</td>
+      <td>0.000237</td>
+      <td>0.000550</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.004851</td>
+      <td>3219.0</td>
+      <td>0.001607</td>
+      <td>0.000894</td>
+      <td>0.000000</td>
+      <td>0.000980</td>
+      <td>0.001491</td>
+      <td>0.002156</td>
+      <td>0.006735</td>
+      <td>3219.0</td>
+      <td>0.014766</td>
+      <td>0.008479</td>
+      <td>0.000000</td>
+      <td>0.008939</td>
+      <td>0.013654</td>
+      <td>0.019544</td>
+      <td>0.063720</td>
+      <td>3219.0</td>
+      <td>0.045948</td>
+      <td>0.019097</td>
+      <td>0.000000</td>
+      <td>0.033457</td>
+      <td>0.043850</td>
+      <td>0.056736</td>
+      <td>0.132385</td>
+      <td>3219.0</td>
+      <td>0.153478</td>
+      <td>0.059033</td>
+      <td>0.000000</td>
+      <td>0.114376</td>
+      <td>0.149340</td>
+      <td>0.187028</td>
+      <td>0.467304</td>
+      <td>3219.0</td>
+      <td>0.006323</td>
+      <td>0.001426</td>
+      <td>0.000658</td>
+      <td>0.005378</td>
+      <td>0.006254</td>
+      <td>0.007194</td>
+      <td>0.013554</td>
+      <td>3219.0</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3219.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3219.0</td>
+      <td>0.079217</td>
+      <td>0.270119</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>ISR</th>
+      <td>3216.0</td>
+      <td>2009.813433</td>
+      <td>5.954939</td>
+      <td>2000.0</td>
+      <td>2005.0</td>
+      <td>2010.0</td>
+      <td>2015.0</td>
+      <td>2020.0</td>
+      <td>3216.0</td>
+      <td>26.201493</td>
+      <td>14.967850</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>26.0</td>
+      <td>39.00</td>
+      <td>52.0</td>
+      <td>3216.0</td>
+      <td>11.562831</td>
+      <td>5.514101</td>
+      <td>0.885781</td>
+      <td>7.293865</td>
+      <td>10.381818</td>
+      <td>14.859302</td>
+      <td>35.348012</td>
+      <td>3216.0</td>
+      <td>93.472385</td>
+      <td>38.101641</td>
+      <td>29.504177</td>
+      <td>56.568794</td>
+      <td>88.021358</td>
+      <td>129.780348</td>
+      <td>197.867503</td>
+      <td>3216.0</td>
+      <td>86.744061</td>
+      <td>34.957625</td>
+      <td>35.001454</td>
+      <td>58.670174</td>
+      <td>73.931414</td>
+      <td>115.396647</td>
+      <td>205.841505</td>
+      <td>3216.0</td>
+      <td>154.028548</td>
+      <td>59.174084</td>
+      <td>74.605338</td>
+      <td>107.419937</td>
+      <td>125.244821</td>
+      <td>208.021900</td>
+      <td>381.159494</td>
+      <td>3216.0</td>
+      <td>175.777374</td>
+      <td>79.989511</td>
+      <td>57.533617</td>
+      <td>112.672111</td>
+      <td>158.102861</td>
+      <td>223.391433</td>
+      <td>475.689187</td>
+      <td>3216.0</td>
+      <td>521.585199</td>
+      <td>199.632334</td>
+      <td>276.000000</td>
+      <td>366.000000</td>
+      <td>421.000000</td>
+      <td>702.00</td>
+      <td>1156.0</td>
+      <td>3216.0</td>
+      <td>0.000429</td>
+      <td>0.000164</td>
+      <td>0.000037</td>
+      <td>0.000311</td>
+      <td>0.000408</td>
+      <td>0.000528</td>
+      <td>0.001351</td>
+      <td>3216.0</td>
+      <td>0.001565</td>
+      <td>0.000428</td>
+      <td>0.000598</td>
+      <td>0.001235</td>
+      <td>0.001535</td>
+      <td>0.001852</td>
+      <td>0.003228</td>
+      <td>3216.0</td>
+      <td>0.015934</td>
+      <td>0.004694</td>
+      <td>0.006472</td>
+      <td>0.012400</td>
+      <td>0.015377</td>
+      <td>0.018695</td>
+      <td>0.038210</td>
+      <td>3216.0</td>
+      <td>0.046730</td>
+      <td>0.009951</td>
+      <td>0.024523</td>
+      <td>0.039617</td>
+      <td>0.045598</td>
+      <td>0.052315</td>
+      <td>0.094105</td>
+      <td>3216.0</td>
+      <td>0.145049</td>
+      <td>0.024315</td>
+      <td>0.098547</td>
+      <td>0.126997</td>
+      <td>0.140367</td>
+      <td>0.158727</td>
+      <td>0.269721</td>
+      <td>3216.0</td>
+      <td>0.005336</td>
+      <td>0.000703</td>
+      <td>0.003815</td>
+      <td>0.004819</td>
+      <td>0.005190</td>
+      <td>0.005753</td>
+      <td>0.008644</td>
+      <td>3216.0</td>
+      <td>1.000000</td>
+      <td>0.00000</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>3216.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3216.0</td>
+      <td>0.078358</td>
+      <td>0.268776</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>ITA</th>
+      <td>855.0</td>
+      <td>2017.280702</td>
+      <td>1.598679</td>
+      <td>2015.0</td>
+      <td>2016.0</td>
+      <td>2017.0</td>
+      <td>2019.0</td>
+      <td>2020.0</td>
+      <td>855.0</td>
+      <td>25.403509</td>
+      <td>14.927059</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>24.0</td>
+      <td>38.00</td>
+      <td>52.0</td>
+      <td>855.0</td>
+      <td>24.142690</td>
+      <td>10.413724</td>
+      <td>2.000000</td>
+      <td>16.000000</td>
+      <td>21.000000</td>
+      <td>31.500000</td>
+      <td>64.000000</td>
+      <td>855.0</td>
+      <td>829.562573</td>
+      <td>330.355519</td>
+      <td>392.000000</td>
+      <td>477.000000</td>
+      <td>767.000000</td>
+      <td>1173.500000</td>
+      <td>1853.000000</td>
+      <td>855.0</td>
+      <td>1045.494737</td>
+      <td>428.757294</td>
+      <td>477.000000</td>
+      <td>626.000000</td>
+      <td>940.000000</td>
+      <td>1451.500000</td>
+      <td>3136.000000</td>
+      <td>855.0</td>
+      <td>2311.307602</td>
+      <td>910.514727</td>
+      <td>1251.000000</td>
+      <td>1622.000000</td>
+      <td>1853.000000</td>
+      <td>3144.500000</td>
+      <td>7085.000000</td>
+      <td>855.0</td>
+      <td>3625.366082</td>
+      <td>1577.660171</td>
+      <td>1458.000000</td>
+      <td>2110.000000</td>
+      <td>3289.000000</td>
+      <td>4808.500000</td>
+      <td>10356.000000</td>
+      <td>855.0</td>
+      <td>7835.873684</td>
+      <td>3049.522395</td>
+      <td>4574.000000</td>
+      <td>5449.000000</td>
+      <td>6198.000000</td>
+      <td>10613.50</td>
+      <td>22448.0</td>
+      <td>855.0</td>
+      <td>0.000232</td>
+      <td>0.000056</td>
+      <td>0.000028</td>
+      <td>0.000196</td>
+      <td>0.000230</td>
+      <td>0.000270</td>
+      <td>0.000429</td>
+      <td>855.0</td>
+      <td>0.001675</td>
+      <td>0.000388</td>
+      <td>0.001039</td>
+      <td>0.001278</td>
+      <td>0.001642</td>
+      <td>0.002011</td>
+      <td>0.003428</td>
+      <td>855.0</td>
+      <td>0.012376</td>
+      <td>0.003461</td>
+      <td>0.007104</td>
+      <td>0.009255</td>
+      <td>0.011950</td>
+      <td>0.014963</td>
+      <td>0.034547</td>
+      <td>855.0</td>
+      <td>0.037859</td>
+      <td>0.009246</td>
+      <td>0.023564</td>
+      <td>0.030946</td>
+      <td>0.036305</td>
+      <td>0.043346</td>
+      <td>0.100853</td>
+      <td>855.0</td>
+      <td>0.138418</td>
+      <td>0.025773</td>
+      <td>0.098449</td>
+      <td>0.119643</td>
+      <td>0.132986</td>
+      <td>0.150990</td>
+      <td>0.277550</td>
+      <td>855.0</td>
+      <td>0.010127</td>
+      <td>0.001553</td>
+      <td>0.008165</td>
+      <td>0.009116</td>
+      <td>0.009689</td>
+      <td>0.010670</td>
+      <td>0.020472</td>
+      <td>855.0</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>855.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>855.0</td>
+      <td>0.456140</td>
+      <td>0.498364</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>LTU</th>
+      <td>3213.0</td>
+      <td>2009.803922</td>
+      <td>5.949572</td>
+      <td>2000.0</td>
+      <td>2005.0</td>
+      <td>2010.0</td>
+      <td>2015.0</td>
+      <td>2020.0</td>
+      <td>3213.0</td>
+      <td>26.196078</td>
+      <td>14.973789</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>26.0</td>
+      <td>39.00</td>
+      <td>52.0</td>
+      <td>3213.0</td>
+      <td>3.660131</td>
+      <td>2.850185</td>
+      <td>0.000000</td>
+      <td>2.000000</td>
+      <td>3.000000</td>
+      <td>5.000000</td>
+      <td>22.000000</td>
+      <td>3213.0</td>
+      <td>151.762838</td>
+      <td>75.497856</td>
+      <td>29.000000</td>
+      <td>71.000000</td>
+      <td>161.000000</td>
+      <td>208.000000</td>
+      <td>386.000000</td>
+      <td>3213.0</td>
+      <td>107.286026</td>
+      <td>44.796976</td>
+      <td>31.000000</td>
+      <td>71.000000</td>
+      <td>96.000000</td>
+      <td>142.000000</td>
+      <td>251.000000</td>
+      <td>3213.0</td>
+      <td>151.790850</td>
+      <td>61.273816</td>
+      <td>50.000000</td>
+      <td>102.000000</td>
+      <td>132.000000</td>
+      <td>206.000000</td>
+      <td>363.000000</td>
+      <td>3213.0</td>
+      <td>114.669157</td>
+      <td>61.683212</td>
+      <td>16.000000</td>
+      <td>55.000000</td>
+      <td>114.000000</td>
+      <td>159.000000</td>
+      <td>351.000000</td>
+      <td>3213.0</td>
+      <td>529.169001</td>
+      <td>196.526979</td>
+      <td>277.000000</td>
+      <td>379.000000</td>
+      <td>426.000000</td>
+      <td>738.00</td>
+      <td>1101.0</td>
+      <td>3213.0</td>
+      <td>0.000548</td>
+      <td>0.000346</td>
+      <td>0.000000</td>
+      <td>0.000252</td>
+      <td>0.000492</td>
+      <td>0.000745</td>
+      <td>0.002442</td>
+      <td>3213.0</td>
+      <td>0.005719</td>
+      <td>0.002433</td>
+      <td>0.001626</td>
+      <td>0.003288</td>
+      <td>0.005598</td>
+      <td>0.007636</td>
+      <td>0.014408</td>
+      <td>3213.0</td>
+      <td>0.030285</td>
+      <td>0.011875</td>
+      <td>0.009488</td>
+      <td>0.020087</td>
+      <td>0.027994</td>
+      <td>0.040340</td>
+      <td>0.064088</td>
+      <td>3213.0</td>
+      <td>0.067251</td>
+      <td>0.017270</td>
+      <td>0.030289</td>
+      <td>0.054488</td>
+      <td>0.063927</td>
+      <td>0.078542</td>
+      <td>0.131193</td>
+      <td>3213.0</td>
+      <td>0.181573</td>
+      <td>0.036837</td>
+      <td>0.084330</td>
+      <td>0.155888</td>
+      <td>0.174953</td>
+      <td>0.202085</td>
+      <td>0.359174</td>
+      <td>3213.0</td>
+      <td>0.013354</td>
+      <td>0.001950</td>
+      <td>0.007784</td>
+      <td>0.012029</td>
+      <td>0.013365</td>
+      <td>0.014613</td>
+      <td>0.020547</td>
+      <td>3213.0</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3213.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3213.0</td>
+      <td>0.126050</td>
+      <td>0.331958</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>LUX</th>
+      <td>3198.0</td>
+      <td>2009.756098</td>
+      <td>5.922283</td>
+      <td>2000.0</td>
+      <td>2005.0</td>
+      <td>2010.0</td>
+      <td>2015.0</td>
+      <td>2020.0</td>
+      <td>3198.0</td>
+      <td>26.182927</td>
+      <td>15.007328</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>26.0</td>
+      <td>39.00</td>
+      <td>52.0</td>
+      <td>3198.0</td>
+      <td>0.406504</td>
+      <td>0.694846</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>1.000000</td>
+      <td>5.000000</td>
+      <td>3198.0</td>
+      <td>9.502189</td>
+      <td>4.946808</td>
+      <td>0.000000</td>
+      <td>6.000000</td>
+      <td>9.000000</td>
+      <td>13.000000</td>
+      <td>29.000000</td>
+      <td>3198.0</td>
+      <td>8.728580</td>
+      <td>4.639874</td>
+      <td>0.000000</td>
+      <td>5.000000</td>
+      <td>8.000000</td>
+      <td>12.000000</td>
+      <td>29.000000</td>
+      <td>3198.0</td>
+      <td>14.971857</td>
+      <td>6.734462</td>
+      <td>2.000000</td>
+      <td>10.000000</td>
+      <td>13.000000</td>
+      <td>19.000000</td>
+      <td>43.000000</td>
+      <td>3198.0</td>
+      <td>15.917448</td>
+      <td>8.654603</td>
+      <td>0.000000</td>
+      <td>9.000000</td>
+      <td>15.000000</td>
+      <td>21.000000</td>
+      <td>58.000000</td>
+      <td>3198.0</td>
+      <td>49.526579</td>
+      <td>19.690356</td>
+      <td>16.000000</td>
+      <td>34.000000</td>
+      <td>42.000000</td>
+      <td>66.00</td>
+      <td>135.0</td>
+      <td>3198.0</td>
+      <td>0.000354</td>
+      <td>0.000621</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000594</td>
+      <td>0.004821</td>
+      <td>3198.0</td>
+      <td>0.002140</td>
+      <td>0.000977</td>
+      <td>0.000000</td>
+      <td>0.001447</td>
+      <td>0.002025</td>
+      <td>0.002676</td>
+      <td>0.007372</td>
+      <td>3198.0</td>
+      <td>0.017642</td>
+      <td>0.008457</td>
+      <td>0.000000</td>
+      <td>0.011540</td>
+      <td>0.016185</td>
+      <td>0.021812</td>
+      <td>0.071918</td>
+      <td>3198.0</td>
+      <td>0.048971</td>
+      <td>0.017888</td>
+      <td>0.006550</td>
+      <td>0.036958</td>
+      <td>0.046858</td>
+      <td>0.058580</td>
+      <td>0.150481</td>
+      <td>3198.0</td>
+      <td>0.158881</td>
+      <td>0.057997</td>
+      <td>0.000000</td>
+      <td>0.120181</td>
+      <td>0.149855</td>
+      <td>0.189370</td>
+      <td>0.575226</td>
+      <td>3198.0</td>
+      <td>0.007562</td>
+      <td>0.001447</td>
+      <td>0.003095</td>
+      <td>0.006555</td>
+      <td>0.007443</td>
+      <td>0.008452</td>
+      <td>0.014286</td>
+      <td>3198.0</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3198.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3198.0</td>
+      <td>0.121951</td>
+      <td>0.327281</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>LVA</th>
+      <td>3222.0</td>
+      <td>2009.832402</td>
+      <td>5.965582</td>
+      <td>2000.0</td>
+      <td>2005.0</td>
+      <td>2010.0</td>
+      <td>2015.0</td>
+      <td>2020.0</td>
+      <td>3222.0</td>
+      <td>26.215084</td>
+      <td>14.957229</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>26.0</td>
+      <td>39.00</td>
+      <td>52.0</td>
+      <td>3222.0</td>
+      <td>2.839039</td>
+      <td>2.330761</td>
+      <td>0.000000</td>
+      <td>1.000000</td>
+      <td>2.000000</td>
+      <td>4.000000</td>
+      <td>14.000000</td>
+      <td>3222.0</td>
+      <td>106.814535</td>
+      <td>53.654950</td>
+      <td>18.000000</td>
+      <td>55.000000</td>
+      <td>106.000000</td>
+      <td>144.000000</td>
+      <td>344.000000</td>
+      <td>3222.0</td>
+      <td>85.517166</td>
+      <td>36.580395</td>
+      <td>19.000000</td>
+      <td>58.000000</td>
+      <td>76.000000</td>
+      <td>109.000000</td>
+      <td>264.000000</td>
+      <td>3222.0</td>
+      <td>113.962590</td>
+      <td>47.406189</td>
+      <td>29.000000</td>
+      <td>73.000000</td>
+      <td>104.000000</td>
+      <td>154.000000</td>
+      <td>290.000000</td>
+      <td>3222.0</td>
+      <td>78.529613</td>
+      <td>43.174982</td>
+      <td>8.000000</td>
+      <td>32.000000</td>
+      <td>84.000000</td>
+      <td>110.000000</td>
+      <td>229.000000</td>
+      <td>3222.0</td>
+      <td>387.662942</td>
+      <td>146.269034</td>
+      <td>197.000000</td>
+      <td>276.000000</td>
+      <td>315.000000</td>
+      <td>531.75</td>
+      <td>1085.0</td>
+      <td>3222.0</td>
+      <td>0.000671</td>
+      <td>0.000482</td>
+      <td>0.000000</td>
+      <td>0.000342</td>
+      <td>0.000654</td>
+      <td>0.000996</td>
+      <td>0.003234</td>
+      <td>3222.0</td>
+      <td>0.005893</td>
+      <td>0.002390</td>
+      <td>0.001409</td>
+      <td>0.003687</td>
+      <td>0.005727</td>
+      <td>0.007614</td>
+      <td>0.016485</td>
+      <td>3222.0</td>
+      <td>0.033378</td>
+      <td>0.013064</td>
+      <td>0.007855</td>
+      <td>0.022803</td>
+      <td>0.030726</td>
+      <td>0.042828</td>
+      <td>0.084496</td>
+      <td>3222.0</td>
+      <td>0.073601</td>
+      <td>0.019637</td>
+      <td>0.032981</td>
+      <td>0.059133</td>
+      <td>0.070423</td>
+      <td>0.085259</td>
+      <td>0.156467</td>
+      <td>3222.0</td>
+      <td>0.190282</td>
+      <td>0.042907</td>
+      <td>0.083414</td>
+      <td>0.160872</td>
+      <td>0.183845</td>
+      <td>0.213656</td>
+      <td>0.490018</td>
+      <td>3222.0</td>
+      <td>0.014336</td>
+      <td>0.001704</td>
+      <td>0.009445</td>
+      <td>0.013202</td>
+      <td>0.014271</td>
+      <td>0.015361</td>
+      <td>0.024385</td>
+      <td>3222.0</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3222.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3222.0</td>
+      <td>0.128492</td>
+      <td>0.334688</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>NLD</th>
+      <td>3999.0</td>
+      <td>2007.321830</td>
+      <td>7.403148</td>
+      <td>1995.0</td>
+      <td>2001.0</td>
+      <td>2007.0</td>
+      <td>2014.0</td>
+      <td>2020.0</td>
+      <td>3999.0</td>
+      <td>26.264816</td>
+      <td>14.971747</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>26.0</td>
+      <td>39.00</td>
+      <td>52.0</td>
+      <td>3999.0</td>
+      <td>14.888235</td>
+      <td>7.486950</td>
+      <td>0.000000</td>
+      <td>9.000000</td>
+      <td>13.000000</td>
+      <td>18.153576</td>
+      <td>45.000000</td>
+      <td>3999.0</td>
+      <td>298.163027</td>
+      <td>115.661307</td>
+      <td>126.000000</td>
+      <td>192.207544</td>
+      <td>267.000000</td>
+      <td>418.500000</td>
+      <td>567.529508</td>
+      <td>3999.0</td>
+      <td>323.312198</td>
+      <td>128.576978</td>
+      <td>122.000000</td>
+      <td>205.000000</td>
+      <td>294.550315</td>
+      <td>448.000000</td>
+      <td>819.000000</td>
+      <td>3999.0</td>
+      <td>549.923116</td>
+      <td>205.735144</td>
+      <td>293.000000</td>
+      <td>394.000000</td>
+      <td>440.000000</td>
+      <td>765.000000</td>
+      <td>1552.000000</td>
+      <td>3999.0</td>
+      <td>615.839455</td>
+      <td>289.560676</td>
+      <td>172.142678</td>
+      <td>361.000000</td>
+      <td>599.000000</td>
+      <td>806.000000</td>
+      <td>2215.000000</td>
+      <td>3999.0</td>
+      <td>1802.126032</td>
+      <td>669.130636</td>
+      <td>1067.000000</td>
+      <td>1289.000000</td>
+      <td>1421.000000</td>
+      <td>2514.50</td>
+      <td>5084.0</td>
+      <td>3999.0</td>
+      <td>0.000400</td>
+      <td>0.000139</td>
+      <td>0.000000</td>
+      <td>0.000294</td>
+      <td>0.000394</td>
+      <td>0.000502</td>
+      <td>0.000945</td>
+      <td>3999.0</td>
+      <td>0.002118</td>
+      <td>0.000402</td>
+      <td>0.001180</td>
+      <td>0.001802</td>
+      <td>0.002080</td>
+      <td>0.002378</td>
+      <td>0.003538</td>
+      <td>3999.0</td>
+      <td>0.018286</td>
+      <td>0.005942</td>
+      <td>0.008942</td>
+      <td>0.014018</td>
+      <td>0.016718</td>
+      <td>0.021448</td>
+      <td>0.044731</td>
+      <td>3999.0</td>
+      <td>0.054067</td>
+      <td>0.015686</td>
+      <td>0.028119</td>
+      <td>0.042756</td>
+      <td>0.050614</td>
+      <td>0.062137</td>
+      <td>0.125065</td>
+      <td>3999.0</td>
+      <td>0.178091</td>
+      <td>0.034278</td>
+      <td>0.117365</td>
+      <td>0.152867</td>
+      <td>0.170715</td>
+      <td>0.196530</td>
+      <td>0.387330</td>
+      <td>3999.0</td>
+      <td>0.008557</td>
+      <td>0.000871</td>
+      <td>0.006874</td>
+      <td>0.007976</td>
+      <td>0.008383</td>
+      <td>0.008976</td>
+      <td>0.016128</td>
+      <td>3999.0</td>
+      <td>0.198050</td>
+      <td>0.39858</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>3999.0</td>
+      <td>0.000500</td>
+      <td>0.022361</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>3999.0</td>
+      <td>0.063766</td>
+      <td>0.244366</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>NOR</th>
+      <td>3219.0</td>
+      <td>2009.822926</td>
+      <td>5.960275</td>
+      <td>2000.0</td>
+      <td>2005.0</td>
+      <td>2010.0</td>
+      <td>2015.0</td>
+      <td>2020.0</td>
+      <td>3219.0</td>
+      <td>26.207829</td>
+      <td>14.962310</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>26.0</td>
+      <td>39.00</td>
+      <td>52.0</td>
+      <td>3219.0</td>
+      <td>3.314694</td>
+      <td>2.412948</td>
+      <td>0.000000</td>
+      <td>2.000000</td>
+      <td>3.000000</td>
+      <td>5.000000</td>
+      <td>29.000000</td>
+      <td>3219.0</td>
+      <td>79.562597</td>
+      <td>32.907493</td>
+      <td>23.000000</td>
+      <td>49.000000</td>
+      <td>75.000000</td>
+      <td>110.000000</td>
+      <td>203.000000</td>
+      <td>3219.0</td>
+      <td>80.177074</td>
+      <td>32.512746</td>
+      <td>25.000000</td>
+      <td>53.000000</td>
+      <td>72.000000</td>
+      <td>109.000000</td>
+      <td>187.000000</td>
+      <td>3219.0</td>
+      <td>157.070519</td>
+      <td>63.630945</td>
+      <td>61.000000</td>
+      <td>108.000000</td>
+      <td>133.000000</td>
+      <td>204.000000</td>
+      <td>494.000000</td>
+      <td>3219.0</td>
+      <td>211.637154</td>
+      <td>89.423070</td>
+      <td>66.000000</td>
+      <td>125.000000</td>
+      <td>201.000000</td>
+      <td>289.000000</td>
+      <td>508.000000</td>
+      <td>3219.0</td>
+      <td>531.762038</td>
+      <td>195.676206</td>
+      <td>267.000000</td>
+      <td>382.000000</td>
+      <td>423.000000</td>
+      <td>745.00</td>
+      <td>1296.0</td>
+      <td>3219.0</td>
+      <td>0.000282</td>
+      <td>0.000186</td>
+      <td>0.000000</td>
+      <td>0.000118</td>
+      <td>0.000235</td>
+      <td>0.000354</td>
+      <td>0.001782</td>
+      <td>3219.0</td>
+      <td>0.001939</td>
+      <td>0.000520</td>
+      <td>0.000751</td>
+      <td>0.001551</td>
+      <td>0.001897</td>
+      <td>0.002284</td>
+      <td>0.004192</td>
+      <td>3219.0</td>
+      <td>0.016001</td>
+      <td>0.004702</td>
+      <td>0.006255</td>
+      <td>0.012628</td>
+      <td>0.015167</td>
+      <td>0.018557</td>
+      <td>0.039130</td>
+      <td>3219.0</td>
+      <td>0.049116</td>
+      <td>0.012706</td>
+      <td>0.022718</td>
+      <td>0.039820</td>
+      <td>0.046968</td>
+      <td>0.056065</td>
+      <td>0.123316</td>
+      <td>3219.0</td>
+      <td>0.160664</td>
+      <td>0.026569</td>
+      <td>0.103123</td>
+      <td>0.141810</td>
+      <td>0.156766</td>
+      <td>0.175086</td>
+      <td>0.333023</td>
+      <td>3219.0</td>
+      <td>0.008504</td>
+      <td>0.001082</td>
+      <td>0.005143</td>
+      <td>0.007721</td>
+      <td>0.008438</td>
+      <td>0.009146</td>
+      <td>0.016079</td>
+      <td>3219.0</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3219.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3219.0</td>
+      <td>0.079217</td>
+      <td>0.270119</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>POL</th>
+      <td>3198.0</td>
+      <td>2009.756098</td>
+      <td>5.922283</td>
+      <td>2000.0</td>
+      <td>2005.0</td>
+      <td>2010.0</td>
+      <td>2015.0</td>
+      <td>2020.0</td>
+      <td>3198.0</td>
+      <td>26.182927</td>
+      <td>15.007328</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>26.0</td>
+      <td>39.00</td>
+      <td>52.0</td>
+      <td>3198.0</td>
+      <td>38.395872</td>
+      <td>18.731553</td>
+      <td>5.000000</td>
+      <td>24.000000</td>
+      <td>34.000000</td>
+      <td>48.000000</td>
+      <td>110.000000</td>
+      <td>3198.0</td>
+      <td>1345.010006</td>
+      <td>601.442791</td>
+      <td>443.000000</td>
+      <td>611.000000</td>
+      <td>1438.000000</td>
+      <td>1925.000000</td>
+      <td>2605.000000</td>
+      <td>3198.0</td>
+      <td>1016.322702</td>
+      <td>413.212667</td>
+      <td>404.000000</td>
+      <td>651.000000</td>
+      <td>927.000000</td>
+      <td>1363.500000</td>
+      <td>2413.000000</td>
+      <td>3198.0</td>
+      <td>1397.245779</td>
+      <td>529.564538</td>
+      <td>648.000000</td>
+      <td>984.000000</td>
+      <td>1144.000000</td>
+      <td>1923.750000</td>
+      <td>3139.000000</td>
+      <td>3198.0</td>
+      <td>1075.134459</td>
+      <td>565.708459</td>
+      <td>255.000000</td>
+      <td>581.500000</td>
+      <td>1031.000000</td>
+      <td>1425.750000</td>
+      <td>3296.000000</td>
+      <td>3198.0</td>
+      <td>4872.108818</td>
+      <td>1791.359433</td>
+      <td>2702.000000</td>
+      <td>3532.250000</td>
+      <td>3885.000000</td>
+      <td>6855.00</td>
+      <td>10225.0</td>
+      <td>3198.0</td>
+      <td>0.000480</td>
+      <td>0.000133</td>
+      <td>0.000091</td>
+      <td>0.000379</td>
+      <td>0.000473</td>
+      <td>0.000572</td>
+      <td>0.001027</td>
+      <td>3198.0</td>
+      <td>0.003911</td>
+      <td>0.001394</td>
+      <td>0.001780</td>
+      <td>0.002346</td>
+      <td>0.003913</td>
+      <td>0.005326</td>
+      <td>0.007028</td>
+      <td>3198.0</td>
+      <td>0.026447</td>
+      <td>0.008960</td>
+      <td>0.012333</td>
+      <td>0.018615</td>
+      <td>0.025074</td>
+      <td>0.033121</td>
+      <td>0.059847</td>
+      <td>3198.0</td>
+      <td>0.063078</td>
+      <td>0.015032</td>
+      <td>0.034678</td>
+      <td>0.051611</td>
+      <td>0.061083</td>
+      <td>0.072824</td>
+      <td>0.137974</td>
+      <td>3198.0</td>
+      <td>0.170478</td>
+      <td>0.029552</td>
+      <td>0.108442</td>
+      <td>0.148763</td>
+      <td>0.167297</td>
+      <td>0.186707</td>
+      <td>0.352021</td>
+      <td>3198.0</td>
+      <td>0.009894</td>
+      <td>0.001124</td>
+      <td>0.007125</td>
+      <td>0.009105</td>
+      <td>0.009865</td>
+      <td>0.010615</td>
+      <td>0.014120</td>
+      <td>3198.0</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3198.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3198.0</td>
+      <td>0.073171</td>
+      <td>0.260457</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>PRT</th>
+      <td>3207.0</td>
+      <td>2009.784846</td>
+      <td>5.938748</td>
+      <td>2000.0</td>
+      <td>2005.0</td>
+      <td>2010.0</td>
+      <td>2015.0</td>
+      <td>2020.0</td>
+      <td>3207.0</td>
+      <td>26.188026</td>
+      <td>14.986619</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>26.0</td>
+      <td>39.00</td>
+      <td>52.0</td>
+      <td>3207.0</td>
+      <td>7.554281</td>
+      <td>4.975722</td>
+      <td>0.000000</td>
+      <td>4.000000</td>
+      <td>6.006842</td>
+      <td>10.000000</td>
+      <td>35.000000</td>
+      <td>3207.0</td>
+      <td>229.394601</td>
+      <td>102.713667</td>
+      <td>68.000000</td>
+      <td>117.000000</td>
+      <td>236.000000</td>
+      <td>311.000000</td>
+      <td>496.000000</td>
+      <td>3207.0</td>
+      <td>226.827507</td>
+      <td>97.104234</td>
+      <td>75.000000</td>
+      <td>143.000000</td>
+      <td>209.000000</td>
+      <td>299.000000</td>
+      <td>651.000000</td>
+      <td>3207.0</td>
+      <td>444.492763</td>
+      <td>177.281665</td>
+      <td>222.000000</td>
+      <td>305.000000</td>
+      <td>367.000000</td>
+      <td>585.000000</td>
+      <td>1228.000000</td>
+      <td>3207.0</td>
+      <td>457.274347</td>
+      <td>229.173681</td>
+      <td>112.000000</td>
+      <td>278.137488</td>
+      <td>420.174533</td>
+      <td>591.000000</td>
+      <td>1522.000000</td>
+      <td>3207.0</td>
+      <td>1365.543499</td>
+      <td>534.455074</td>
+      <td>704.000000</td>
+      <td>941.000000</td>
+      <td>1119.000000</td>
+      <td>1805.50</td>
+      <td>3366.0</td>
+      <td>3207.0</td>
+      <td>0.000368</td>
+      <td>0.000192</td>
+      <td>0.000000</td>
+      <td>0.000228</td>
+      <td>0.000337</td>
+      <td>0.000480</td>
+      <td>0.001382</td>
+      <td>3207.0</td>
+      <td>0.002610</td>
+      <td>0.000926</td>
+      <td>0.001015</td>
+      <td>0.001713</td>
+      <td>0.002568</td>
+      <td>0.003361</td>
+      <td>0.005297</td>
+      <td>3207.0</td>
+      <td>0.017419</td>
+      <td>0.006214</td>
+      <td>0.006411</td>
+      <td>0.012656</td>
+      <td>0.016639</td>
+      <td>0.021371</td>
+      <td>0.046591</td>
+      <td>3207.0</td>
+      <td>0.052330</td>
+      <td>0.015310</td>
+      <td>0.025092</td>
+      <td>0.040917</td>
+      <td>0.050167</td>
+      <td>0.061240</td>
+      <td>0.129662</td>
+      <td>3207.0</td>
+      <td>0.163083</td>
+      <td>0.039351</td>
+      <td>0.096970</td>
+      <td>0.133536</td>
+      <td>0.153891</td>
+      <td>0.182982</td>
+      <td>0.390271</td>
+      <td>3207.0</td>
+      <td>0.010228</td>
+      <td>0.001728</td>
+      <td>0.006706</td>
+      <td>0.008983</td>
+      <td>0.009885</td>
+      <td>0.011197</td>
+      <td>0.017278</td>
+      <td>3207.0</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3207.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3207.0</td>
+      <td>0.075772</td>
+      <td>0.264674</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>RUS</th>
+      <td>2964.0</td>
+      <td>2009.000000</td>
+      <td>5.478150</td>
+      <td>2000.0</td>
+      <td>2004.0</td>
+      <td>2009.0</td>
+      <td>2014.0</td>
+      <td>2018.0</td>
+      <td>2964.0</td>
+      <td>26.500000</td>
+      <td>15.010863</td>
+      <td>1.0</td>
+      <td>13.75</td>
+      <td>26.5</td>
+      <td>39.25</td>
+      <td>52.0</td>
+      <td>2964.0</td>
+      <td>297.569947</td>
+      <td>135.382736</td>
+      <td>83.115132</td>
+      <td>192.450110</td>
+      <td>255.734105</td>
+      <td>388.124094</td>
+      <td>822.223373</td>
+      <td>2964.0</td>
+      <td>10058.879207</td>
+      <td>4826.755644</td>
+      <td>3116.349653</td>
+      <td>4645.406699</td>
+      <td>10594.886895</td>
+      <td>13612.429401</td>
+      <td>24931.767845</td>
+      <td>2964.0</td>
+      <td>5565.601241</td>
+      <td>2447.202182</td>
+      <td>2256.571429</td>
+      <td>3649.925197</td>
+      <td>5011.944452</td>
+      <td>6523.005721</td>
+      <td>14062.291959</td>
+      <td>2964.0</td>
+      <td>6689.566126</td>
+      <td>2754.406299</td>
+      <td>2122.576159</td>
+      <td>3878.771443</td>
+      <td>6385.873976</td>
+      <td>9389.105797</td>
+      <td>15634.122051</td>
+      <td>2964.0</td>
+      <td>3475.063641</td>
+      <td>1932.884026</td>
+      <td>629.036371</td>
+      <td>1288.068033</td>
+      <td>3923.792459</td>
+      <td>4883.142217</td>
+      <td>8784.763548</td>
+      <td>2964.0</td>
+      <td>26086.680162</td>
+      <td>9744.786016</td>
+      <td>15507.000000</td>
+      <td>18315.750000</td>
+      <td>21007.500000</td>
+      <td>35750.50</td>
+      <td>57676.0</td>
+      <td>2964.0</td>
+      <td>0.001004</td>
+      <td>0.000279</td>
+      <td>0.000349</td>
+      <td>0.000813</td>
+      <td>0.000994</td>
+      <td>0.001184</td>
+      <td>0.002047</td>
+      <td>2964.0</td>
+      <td>0.007831</td>
+      <td>0.003322</td>
+      <td>0.003191</td>
+      <td>0.004579</td>
+      <td>0.007490</td>
+      <td>0.010144</td>
+      <td>0.019046</td>
+      <td>2964.0</td>
+      <td>0.040728</td>
+      <td>0.015073</td>
+      <td>0.016688</td>
+      <td>0.028468</td>
+      <td>0.037938</td>
+      <td>0.050680</td>
+      <td>0.089314</td>
+      <td>2964.0</td>
+      <td>0.088794</td>
+      <td>0.018950</td>
+      <td>0.053366</td>
+      <td>0.074192</td>
+      <td>0.085423</td>
+      <td>0.103282</td>
+      <td>0.162933</td>
+      <td>2964.0</td>
+      <td>0.209686</td>
+      <td>0.029580</td>
+      <td>0.148793</td>
+      <td>0.187141</td>
+      <td>0.206963</td>
+      <td>0.225220</td>
+      <td>0.371701</td>
+      <td>2964.0</td>
+      <td>0.014248</td>
+      <td>0.002084</td>
+      <td>0.010485</td>
+      <td>0.012674</td>
+      <td>0.013869</td>
+      <td>0.015600</td>
+      <td>0.024020</td>
+      <td>2964.0</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>2964.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>2964.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>SVK</th>
+      <td>3201.0</td>
+      <td>2009.765698</td>
+      <td>5.927802</td>
+      <td>2000.0</td>
+      <td>2005.0</td>
+      <td>2010.0</td>
+      <td>2015.0</td>
+      <td>2020.0</td>
+      <td>3201.0</td>
+      <td>26.183693</td>
+      <td>15.000312</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>26.0</td>
+      <td>39.00</td>
+      <td>52.0</td>
+      <td>3201.0</td>
+      <td>6.498594</td>
+      <td>3.709795</td>
+      <td>0.000000</td>
+      <td>4.000000</td>
+      <td>6.000000</td>
+      <td>9.000000</td>
+      <td>23.000000</td>
+      <td>3201.0</td>
+      <td>181.843174</td>
+      <td>82.138708</td>
+      <td>15.000000</td>
+      <td>86.000000</td>
+      <td>193.000000</td>
+      <td>255.000000</td>
+      <td>352.000000</td>
+      <td>3201.0</td>
+      <td>145.132771</td>
+      <td>57.647600</td>
+      <td>15.000000</td>
+      <td>96.000000</td>
+      <td>129.000000</td>
+      <td>199.000000</td>
+      <td>324.000000</td>
+      <td>3201.0</td>
+      <td>204.685411</td>
+      <td>79.245328</td>
+      <td>28.000000</td>
+      <td>141.000000</td>
+      <td>172.000000</td>
+      <td>280.000000</td>
+      <td>432.000000</td>
+      <td>3201.0</td>
+      <td>136.045611</td>
+      <td>66.446678</td>
+      <td>21.000000</td>
+      <td>72.000000</td>
+      <td>135.000000</td>
+      <td>182.000000</td>
+      <td>400.000000</td>
+      <td>3201.0</td>
+      <td>674.205561</td>
+      <td>246.858575</td>
+      <td>102.000000</td>
+      <td>487.000000</td>
+      <td>536.000000</td>
+      <td>956.00</td>
+      <td>1411.0</td>
+      <td>3201.0</td>
+      <td>0.000570</td>
+      <td>0.000256</td>
+      <td>0.000000</td>
+      <td>0.000379</td>
+      <td>0.000553</td>
+      <td>0.000732</td>
+      <td>0.001701</td>
+      <td>3201.0</td>
+      <td>0.003718</td>
+      <td>0.001337</td>
+      <td>0.000429</td>
+      <td>0.002344</td>
+      <td>0.003728</td>
+      <td>0.004888</td>
+      <td>0.006894</td>
+      <td>3201.0</td>
+      <td>0.028735</td>
+      <td>0.010124</td>
+      <td>0.002419</td>
+      <td>0.020974</td>
+      <td>0.027128</td>
+      <td>0.035051</td>
+      <td>0.062965</td>
+      <td>3201.0</td>
+      <td>0.073305</td>
+      <td>0.016614</td>
+      <td>0.008592</td>
+      <td>0.061199</td>
+      <td>0.071314</td>
+      <td>0.083334</td>
+      <td>0.138898</td>
+      <td>3201.0</td>
+      <td>0.191562</td>
+      <td>0.035249</td>
+      <td>0.038668</td>
+      <td>0.166247</td>
+      <td>0.186943</td>
+      <td>0.211421</td>
+      <td>0.376086</td>
+      <td>3201.0</td>
+      <td>0.009746</td>
+      <td>0.001016</td>
+      <td>0.001901</td>
+      <td>0.009060</td>
+      <td>0.009662</td>
+      <td>0.010355</td>
+      <td>0.013891</td>
+      <td>3201.0</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3201.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3201.0</td>
+      <td>0.122774</td>
+      <td>0.328229</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>SVN</th>
+      <td>3159.0</td>
+      <td>2009.629630</td>
+      <td>5.847618</td>
+      <td>2000.0</td>
+      <td>2005.0</td>
+      <td>2010.0</td>
+      <td>2015.0</td>
+      <td>2020.0</td>
+      <td>3159.0</td>
+      <td>26.259259</td>
+      <td>15.078144</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>26.0</td>
+      <td>39.00</td>
+      <td>52.0</td>
+      <td>3159.0</td>
+      <td>1.142134</td>
+      <td>1.199955</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>1.000000</td>
+      <td>2.000000</td>
+      <td>8.000000</td>
+      <td>3159.0</td>
+      <td>51.585945</td>
+      <td>24.730430</td>
+      <td>9.000000</td>
+      <td>26.000000</td>
+      <td>53.000000</td>
+      <td>70.000000</td>
+      <td>123.000000</td>
+      <td>3159.0</td>
+      <td>48.172206</td>
+      <td>21.353373</td>
+      <td>11.000000</td>
+      <td>30.000000</td>
+      <td>45.000000</td>
+      <td>64.000000</td>
+      <td>128.000000</td>
+      <td>3159.0</td>
+      <td>76.892054</td>
+      <td>30.810758</td>
+      <td>21.000000</td>
+      <td>54.000000</td>
+      <td>65.000000</td>
+      <td>103.000000</td>
+      <td>207.000000</td>
+      <td>3159.0</td>
+      <td>66.996518</td>
+      <td>38.004620</td>
+      <td>8.000000</td>
+      <td>35.000000</td>
+      <td>63.000000</td>
+      <td>89.000000</td>
+      <td>264.000000</td>
+      <td>3159.0</td>
+      <td>244.788857</td>
+      <td>92.073741</td>
+      <td>127.000000</td>
+      <td>174.000000</td>
+      <td>196.000000</td>
+      <td>338.00</td>
+      <td>599.0</td>
+      <td>3159.0</td>
+      <td>0.000300</td>
+      <td>0.000308</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000329</td>
+      <td>0.000376</td>
+      <td>0.001920</td>
+      <td>3159.0</td>
+      <td>0.002865</td>
+      <td>0.001078</td>
+      <td>0.000716</td>
+      <td>0.001966</td>
+      <td>0.002785</td>
+      <td>0.003581</td>
+      <td>0.006728</td>
+      <td>3159.0</td>
+      <td>0.020472</td>
+      <td>0.008180</td>
+      <td>0.004621</td>
+      <td>0.014397</td>
+      <td>0.019197</td>
+      <td>0.025161</td>
+      <td>0.052584</td>
+      <td>3159.0</td>
+      <td>0.054874</td>
+      <td>0.016059</td>
+      <td>0.021799</td>
+      <td>0.043491</td>
+      <td>0.052055</td>
+      <td>0.063116</td>
+      <td>0.148243</td>
+      <td>3159.0</td>
+      <td>0.165696</td>
+      <td>0.042864</td>
+      <td>0.072154</td>
+      <td>0.136341</td>
+      <td>0.157962</td>
+      <td>0.186433</td>
+      <td>0.401386</td>
+      <td>3159.0</td>
+      <td>0.009388</td>
+      <td>0.001163</td>
+      <td>0.006493</td>
+      <td>0.008585</td>
+      <td>0.009248</td>
+      <td>0.009992</td>
+      <td>0.016397</td>
+      <td>3159.0</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3159.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3159.0</td>
+      <td>0.111111</td>
+      <td>0.314319</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>SWE</th>
+      <td>3219.0</td>
+      <td>2009.822926</td>
+      <td>5.960275</td>
+      <td>2000.0</td>
+      <td>2005.0</td>
+      <td>2010.0</td>
+      <td>2015.0</td>
+      <td>2020.0</td>
+      <td>3219.0</td>
+      <td>26.207829</td>
+      <td>14.962310</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>26.0</td>
+      <td>39.00</td>
+      <td>52.0</td>
+      <td>3219.0</td>
+      <td>5.608574</td>
+      <td>3.187569</td>
+      <td>0.000000</td>
+      <td>3.000000</td>
+      <td>5.000000</td>
+      <td>7.000000</td>
+      <td>18.000000</td>
+      <td>3219.0</td>
+      <td>141.328363</td>
+      <td>57.245049</td>
+      <td>45.000000</td>
+      <td>90.000000</td>
+      <td>132.000000</td>
+      <td>192.500000</td>
+      <td>291.000000</td>
+      <td>3219.0</td>
+      <td>175.426530</td>
+      <td>68.249841</td>
+      <td>67.000000</td>
+      <td>116.000000</td>
+      <td>155.000000</td>
+      <td>244.000000</td>
+      <td>372.000000</td>
+      <td>3219.0</td>
+      <td>346.616340</td>
+      <td>133.315536</td>
+      <td>161.000000</td>
+      <td>245.000000</td>
+      <td>285.000000</td>
+      <td>464.000000</td>
+      <td>798.000000</td>
+      <td>3219.0</td>
+      <td>486.284560</td>
+      <td>199.858413</td>
+      <td>180.000000</td>
+      <td>297.000000</td>
+      <td>448.000000</td>
+      <td>664.000000</td>
+      <td>1193.000000</td>
+      <td>3219.0</td>
+      <td>1155.264368</td>
+      <td>424.216056</td>
+      <td>680.000000</td>
+      <td>829.000000</td>
+      <td>913.000000</td>
+      <td>1622.00</td>
+      <td>2568.0</td>
+      <td>3219.0</td>
+      <td>0.000268</td>
+      <td>0.000127</td>
+      <td>0.000000</td>
+      <td>0.000181</td>
+      <td>0.000261</td>
+      <td>0.000346</td>
+      <td>0.000821</td>
+      <td>3219.0</td>
+      <td>0.001823</td>
+      <td>0.000426</td>
+      <td>0.000754</td>
+      <td>0.001491</td>
+      <td>0.001794</td>
+      <td>0.002113</td>
+      <td>0.003112</td>
+      <td>3219.0</td>
+      <td>0.015262</td>
+      <td>0.003738</td>
+      <td>0.007484</td>
+      <td>0.012472</td>
+      <td>0.014630</td>
+      <td>0.017542</td>
+      <td>0.032464</td>
+      <td>3219.0</td>
+      <td>0.047167</td>
+      <td>0.010678</td>
+      <td>0.024931</td>
+      <td>0.039356</td>
+      <td>0.045624</td>
+      <td>0.053466</td>
+      <td>0.088995</td>
+      <td>3219.0</td>
+      <td>0.161799</td>
+      <td>0.024471</td>
+      <td>0.107137</td>
+      <td>0.143973</td>
+      <td>0.158148</td>
+      <td>0.176023</td>
+      <td>0.308641</td>
+      <td>3219.0</td>
+      <td>0.009569</td>
+      <td>0.001044</td>
+      <td>0.006915</td>
+      <td>0.008841</td>
+      <td>0.009499</td>
+      <td>0.010212</td>
+      <td>0.014051</td>
+      <td>3219.0</td>
+      <td>0.000000</td>
+      <td>0.00000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3219.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3219.0</td>
+      <td>0.079217</td>
+      <td>0.270119</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>USA</th>
+      <td>1188.0</td>
+      <td>2016.323232</td>
+      <td>2.206653</td>
+      <td>2013.0</td>
+      <td>2014.0</td>
+      <td>2016.0</td>
+      <td>2018.0</td>
+      <td>2020.0</td>
+      <td>1188.0</td>
+      <td>25.691919</td>
+      <td>14.884595</td>
+      <td>1.0</td>
+      <td>13.00</td>
+      <td>25.0</td>
+      <td>38.00</td>
+      <td>52.0</td>
+      <td>1188.0</td>
+      <td>401.029001</td>
+      <td>148.332349</td>
+      <td>125.804828</td>
+      <td>273.902525</td>
+      <td>341.659243</td>
+      <td>578.562779</td>
+      <td>706.290587</td>
+      <td>1188.0</td>
+      <td>8949.178070</td>
+      <td>3495.876598</td>
+      <td>3766.347217</td>
+      <td>5193.229482</td>
+      <td>8298.745989</td>
+      <td>12963.758958</td>
+      <td>18557.479529</td>
+      <td>1188.0</td>
+      <td>6580.745536</td>
+      <td>2534.392224</td>
+      <td>3384.168906</td>
+      <td>4503.272682</td>
+      <td>5566.377317</td>
+      <td>9138.113455</td>
+      <td>15436.117103</td>
+      <td>1188.0</td>
+      <td>8380.061774</td>
+      <td>3095.316661</td>
+      <td>4888.391052</td>
+      <td>5977.806043</td>
+      <td>6635.842511</td>
+      <td>11662.993536</td>
+      <td>19144.313181</td>
+      <td>1188.0</td>
+      <td>11105.837471</td>
+      <td>4395.050727</td>
+      <td>5243.361932</td>
+      <td>6754.846674</td>
+      <td>10180.000310</td>
+      <td>15455.707621</td>
+      <td>24901.569716</td>
+      <td>1188.0</td>
+      <td>35416.851852</td>
+      <td>13256.664331</td>
+      <td>18230.102356</td>
+      <td>24415.697153</td>
+      <td>29604.068394</td>
+      <td>49906.25</td>
+      <td>78574.0</td>
+      <td>1188.0</td>
+      <td>0.000514</td>
+      <td>0.000056</td>
+      <td>0.000224</td>
+      <td>0.000473</td>
+      <td>0.000516</td>
+      <td>0.000556</td>
+      <td>0.000662</td>
+      <td>1188.0</td>
+      <td>0.003290</td>
+      <td>0.000699</td>
+      <td>0.001844</td>
+      <td>0.002531</td>
+      <td>0.003255</td>
+      <td>0.003975</td>
+      <td>0.005677</td>
+      <td>1188.0</td>
+      <td>0.018000</td>
+      <td>0.003422</td>
+      <td>0.010454</td>
+      <td>0.014898</td>
+      <td>0.017664</td>
+      <td>0.020538</td>
+      <td>0.030364</td>
+      <td>1188.0</td>
+      <td>0.045315</td>
+      <td>0.006956</td>
+      <td>0.027535</td>
+      <td>0.039728</td>
+      <td>0.044554</td>
+      <td>0.050001</td>
+      <td>0.071690</td>
+      <td>1188.0</td>
+      <td>0.137761</td>
+      <td>0.014167</td>
+      <td>0.096650</td>
+      <td>0.126752</td>
+      <td>0.135919</td>
+      <td>0.145216</td>
+      <td>0.212510</td>
+      <td>1188.0</td>
+      <td>0.008568</td>
+      <td>0.001226</td>
+      <td>0.005697</td>
+      <td>0.007642</td>
+      <td>0.008501</td>
+      <td>0.009365</td>
+      <td>0.014320</td>
+      <td>1188.0</td>
+      <td>1.000000</td>
+      <td>0.00000</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>1188.0</td>
+      <td>0.666667</td>
+      <td>0.471603</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>1188.0</td>
+      <td>0.212121</td>
+      <td>0.408982</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+# Sometimes data is skewed. In this situation, its nice to look at the median. Print the median for all countries and all variables.
+med = Data2.median()
+print(med)
+```
+
+               Year  Week       D0_14        D15_64       D65_74       D75_84  \
+    Country                                                                     
+    AUT      2010.0  26.0    5.000000    164.000000   152.000000   243.500000   
+    BEL      2010.0  26.0    8.000000    222.000000   203.000000   345.000000   
+    BGR      2015.0  26.0    8.000000    300.000000   274.000000   380.000000   
+    CHE      2010.0  26.0    5.000000    111.000000   107.000000   182.000000   
+    CZE      2012.0  26.0    6.000000    300.000000   272.000000   351.000000   
+    DEUTNP   2018.0  24.0   39.008863   1646.932889  1614.288062  3159.099231   
+    DNK      2013.0  26.0    3.000000    106.000000   118.000000   160.000000   
+    ESP      2010.0  26.0   25.000000    789.000000   732.000000  1256.000000   
+    EST      2010.0  26.0    1.000000     52.000000    41.000000    55.000000   
+    FIN      2005.0  26.0    3.000000    137.000000   112.000000   160.000000   
+    FRATNP   2010.0  26.0   46.000000   1340.000000  1006.000000  1562.000000   
+    GBRTENW  2015.0  26.0   42.000000    905.000000   944.000000  1551.000000   
+    GBR_SCO  2010.0  26.0    4.000000    126.000000   118.000000   181.000000   
+    HRV      2010.0  26.5    3.000000    136.000000   131.270882   201.000000   
+    HUN      2010.0  26.0    8.006425    454.681310   317.000000   426.000000   
+    ISL      2010.0  26.0    0.000000      4.000000     4.000000     7.000000   
+    ISR      2010.0  26.0   10.381818     88.021358    73.931414   125.244821   
+    ITA      2017.0  24.0   21.000000    767.000000   940.000000  1853.000000   
+    LTU      2010.0  26.0    3.000000    161.000000    96.000000   132.000000   
+    LUX      2010.0  26.0    0.000000      9.000000     8.000000    13.000000   
+    LVA      2010.0  26.0    2.000000    106.000000    76.000000   104.000000   
+    NLD      2007.0  26.0   13.000000    267.000000   294.550315   440.000000   
+    NOR      2010.0  26.0    3.000000     75.000000    72.000000   133.000000   
+    POL      2010.0  26.0   34.000000   1438.000000   927.000000  1144.000000   
+    PRT      2010.0  26.0    6.006842    236.000000   209.000000   367.000000   
+    RUS      2009.0  26.5  255.734105  10594.886895  5011.944452  6385.873976   
+    SVK      2010.0  26.0    6.000000    193.000000   129.000000   172.000000   
+    SVN      2010.0  26.0    1.000000     53.000000    45.000000    65.000000   
+    SWE      2010.0  26.0    5.000000    132.000000   155.000000   285.000000   
+    USA      2016.0  25.0  341.659243   8298.745989  5566.377317  6635.842511   
+    
+                     D85p        DTotal     R0_14    R15_64    R65_74    R75_84  \
+    Country                                                                       
+    AUT        365.000000    792.000000  0.000323  0.002251  0.016321  0.046438   
+    BEL        459.000000   1078.500000  0.000352  0.002496  0.017124  0.048454   
+    BGR        302.000000   1105.000000  0.000648  0.004777  0.028200  0.074920   
+    CHE        327.000000    643.000000  0.000343  0.001672  0.012864  0.038715   
+    CZE        360.000000   1080.000000  0.000296  0.003157  0.022278  0.060981   
+    DEUTNP    4305.401729   9755.622747  0.000329  0.002466  0.016297  0.042830   
+    DNK        217.000000    541.000000  0.000301  0.002401  0.017827  0.049755   
+    ESP       1799.000000   3989.000000  0.000323  0.001927  0.014355  0.042507   
+    EST         50.094203    172.000000  0.000476  0.004408  0.025974  0.061673   
+    FIN        189.000000    508.000000  0.000315  0.002887  0.018651  0.053866   
+    FRATNP    2601.000000   5570.000000  0.000352  0.002538  0.014240  0.038802   
+    GBRTENW   2331.000000   5310.000000  0.000367  0.002067  0.015305  0.044736   
+    GBR_SCO    209.000000    571.000000  0.000361  0.003033  0.021331  0.057554   
+    HRV        138.000000    523.000000  0.000437  0.003542  0.025032  0.070331   
+    HUN        356.000000   1324.500000  0.000482  0.005066  0.029269  0.071156   
+    ISL          8.000000     22.000000  0.000000  0.001491  0.013654  0.043850   
+    ISR        158.102861    421.000000  0.000408  0.001535  0.015377  0.045598   
+    ITA       3289.000000   6198.000000  0.000230  0.001642  0.011950  0.036305   
+    LTU        114.000000    426.000000  0.000492  0.005598  0.027994  0.063927   
+    LUX         15.000000     42.000000  0.000000  0.002025  0.016185  0.046858   
+    LVA         84.000000    315.000000  0.000654  0.005727  0.030726  0.070423   
+    NLD        599.000000   1421.000000  0.000394  0.002080  0.016718  0.050614   
+    NOR        201.000000    423.000000  0.000235  0.001897  0.015167  0.046968   
+    POL       1031.000000   3885.000000  0.000473  0.003913  0.025074  0.061083   
+    PRT        420.174533   1119.000000  0.000337  0.002568  0.016639  0.050167   
+    RUS       3923.792459  21007.500000  0.000994  0.007490  0.037938  0.085423   
+    SVK        135.000000    536.000000  0.000553  0.003728  0.027128  0.071314   
+    SVN         63.000000    196.000000  0.000329  0.002785  0.019197  0.052055   
+    SWE        448.000000    913.000000  0.000261  0.001794  0.014630  0.045624   
+    USA      10180.000310  29604.068394  0.000516  0.003255  0.017664  0.044554   
+    
+                 R85p    RTotal  Split  SplitSex  Forecast  
+    Country                                                 
+    AUT      0.157538  0.009049    0.0       0.0       0.0  
+    BEL      0.155618  0.009557    0.0       0.0       0.0  
+    BGR      0.197438  0.014881    0.0       0.0       0.0  
+    CHE      0.154010  0.007959    0.0       0.0       0.0  
+    CZE      0.175160  0.010175    0.0       0.0       0.0  
+    DEUTNP   0.151918  0.011184    1.0       1.0       1.0  
+    DNK      0.155836  0.009317    0.0       0.0       0.0  
+    ESP      0.140664  0.008414    0.0       0.0       0.0  
+    EST      0.166367  0.012080    0.0       0.0       0.0  
+    FIN      0.161677  0.009420    0.0       0.0       0.0  
+    FRATNP   0.137329  0.008655    0.0       0.0       0.0  
+    GBRTENW  0.144231  0.008744    0.0       0.0       0.0  
+    GBR_SCO  0.161795  0.010511    0.0       0.0       0.0  
+    HRV      0.189362  0.012017    0.0       0.0       0.0  
+    HUN      0.183862  0.013011    0.0       0.0       0.0  
+    ISL      0.149340  0.006254    0.0       0.0       0.0  
+    ISR      0.140367  0.005190    1.0       0.0       0.0  
+    ITA      0.132986  0.009689    0.0       0.0       0.0  
+    LTU      0.174953  0.013365    0.0       0.0       0.0  
+    LUX      0.149855  0.007443    0.0       0.0       0.0  
+    LVA      0.183845  0.014271    0.0       0.0       0.0  
+    NLD      0.170715  0.008383    0.0       0.0       0.0  
+    NOR      0.156766  0.008438    0.0       0.0       0.0  
+    POL      0.167297  0.009865    0.0       0.0       0.0  
+    PRT      0.153891  0.009885    0.0       0.0       0.0  
+    RUS      0.206963  0.013869    0.0       0.0       0.0  
+    SVK      0.186943  0.009662    0.0       0.0       0.0  
+    SVN      0.157962  0.009248    0.0       0.0       0.0  
+    SWE      0.158148  0.009499    0.0       0.0       0.0  
+    USA      0.135919  0.008501    1.0       1.0       0.0  
+
+
+
+```python
+# Lets check our dispersion. Print the variance.  
+var = Data2.var()
+print(var)
+```
+
+                  Year        Week         D0_14        D15_64        D65_74  \
+    Country                                                                    
+    AUT      35.461294  224.036527     11.163216  4.889239e+03  4.332572e+03   
+    BEL      35.461294  224.036527     22.202700  8.677074e+03  8.410805e+03   
+    BGR       9.460820  222.417113     22.856677  1.672326e+04  1.442811e+04   
+    CHE      35.397407  224.214343     10.345968  2.321137e+03  2.178552e+03   
+    CZE      20.120065  224.889176     12.039658  1.668342e+04  1.488898e+04   
+    DEUTNP    1.783445  219.938024    309.464911  4.788362e+05  4.891210e+05   
+    DNK      15.530204  223.095902      6.267765  2.369849e+03  2.681324e+03   
+    ESP      35.524881  223.870716    167.031336  1.083813e+05  1.098172e+05   
+    EST      35.524881  223.870716      1.975558  8.796179e+02  4.182619e+02   
+    FIN      78.159246  224.452573      9.580059  3.571608e+03  2.491032e+03   
+    FRATNP   35.007717  225.431399    478.789140  3.016692e+05  1.930741e+05   
+    GBRTENW   9.460820  222.417113    393.319960  1.556495e+05  1.864223e+05   
+    GBR_SCO  35.404383  223.652026      7.711598  3.078906e+03  3.003353e+03   
+    HRV      30.010125  225.326021      6.992274  3.442225e+03  3.997690e+03   
+    HUN      35.333219  224.402360     31.239609  3.821293e+04  2.013073e+04   
+    ISL      35.524881  223.870716      0.200978  7.418996e+00  6.478254e+00   
+    ISR      35.461294  224.036527     30.405312  1.451735e+03  1.222036e+03   
+    ITA       2.555775  222.817084    108.445658  1.091348e+05  1.838328e+05   
+    LTU      35.397407  224.214343      8.123556  5.699926e+03  2.006769e+03   
+    LUX      35.073430  225.219890      0.482810  2.447091e+01  2.152844e+01   
+    LVA      35.588171  223.718704      5.432448  2.878854e+03  1.338125e+03   
+    NLD      54.806604  224.153217     56.054418  1.337754e+04  1.653204e+04   
+    NOR      35.524881  223.870716      5.822317  1.082903e+03  1.057079e+03   
+    POL      35.073430  225.219890    350.871075  3.617334e+05  1.707447e+05   
+    PRT      35.268728  224.598759     24.757811  1.055010e+04  9.429232e+03   
+    RUS      30.010125  225.326021  18328.485201  2.329757e+07  5.988799e+06   
+    SVK      35.138836  225.009371     13.762576  6.746767e+03  3.323246e+03   
+    SVN      34.194638  227.350433      1.439893  6.115942e+02  4.559665e+02   
+    SWE      35.524881  223.870716     10.160598  3.276996e+03  4.658041e+03   
+    USA       4.869317  221.551173  22002.485893  1.222115e+07  6.423144e+06   
+    
+                   D75_84          D85p        DTotal         R0_14        R15_64  \
+    Country                                                                         
+    AUT      1.303775e+04  2.979329e+04  1.363346e+05  2.776278e-08  4.617892e-07   
+    BEL      2.667499e+04  5.321295e+04  2.624014e+05  2.498952e-08  4.267757e-07   
+    BGR      3.150668e+04  1.877539e+04  2.657844e+05  8.201445e-08  2.450779e-06   
+    CHE      6.967136e+03  2.381317e+04  9.083368e+04  2.844950e-08  2.365237e-07   
+    CZE      2.690336e+04  2.928966e+04  2.555705e+05  2.094624e-08  1.017292e-06   
+    DEUTNP   2.124540e+06  3.673597e+06  2.011719e+07  1.392763e-09  3.529974e-07   
+    DNK      5.511278e+03  9.140088e+03  6.252090e+04  3.010505e-08  4.141008e-07   
+    ESP      3.670841e+05  9.273275e+05  3.846625e+06  1.198040e-08  4.072013e-07   
+    EST      6.441960e+02  7.267645e+02  6.397071e+03  2.384094e-07  5.032600e-06   
+    FIN      5.533259e+03  1.019700e+04  5.561888e+04  5.107913e-08  1.123235e-06   
+    FRATNP   5.302979e+05  1.707882e+06  6.984567e+06  6.492845e-09  6.306077e-07   
+    GBRTENW  5.714685e+05  1.330029e+06  6.840925e+06  6.384500e-09  1.907794e-07   
+    GBR_SCO  7.424700e+03  9.928676e+03  7.455739e+04  4.592511e-08  5.967102e-07   
+    HRV      8.719148e+03  5.950858e+03  5.974361e+04  7.217185e-08  1.630353e-06   
+    HUN      3.835422e+04  2.982383e+04  3.803365e+05  4.227165e-08  2.829994e-06   
+    ISL      1.542365e+01  2.577015e+01  1.178861e+02  3.027927e-07  7.987977e-07   
+    ISR      3.501572e+03  6.398322e+03  3.985307e+04  2.683467e-08  1.830098e-07   
+    ITA      8.290371e+05  2.489012e+06  9.299587e+06  3.180955e-09  1.502146e-07   
+    LTU      3.754481e+03  3.804819e+03  3.862285e+04  1.196105e-07  5.919579e-06   
+    LUX      4.535298e+01  7.490216e+01  3.877101e+02  3.862531e-07  9.542245e-07   
+    LVA      2.247347e+03  1.864079e+03  2.139463e+04  2.319065e-07  5.710261e-06   
+    NLD      4.232695e+04  8.384539e+04  4.477358e+05  1.924398e-08  1.612960e-07   
+    NOR      4.048897e+03  7.996485e+03  3.828918e+04  3.445176e-08  2.706572e-07   
+    POL      2.804386e+05  3.200261e+05  3.208969e+06  1.771048e-08  1.943393e-06   
+    PRT      3.142879e+04  5.252058e+04  2.856422e+05  3.673363e-08  8.571214e-07   
+    RUS      7.586754e+06  3.736041e+06  9.496085e+07  7.784615e-08  1.103645e-05   
+    SVK      6.279822e+03  4.415161e+03  6.093916e+04  6.559379e-08  1.788522e-06   
+    SVN      9.493028e+02  1.444351e+03  8.477574e+03  9.478516e-08  1.162469e-06   
+    SWE      1.777303e+04  3.994339e+04  1.799593e+05  1.607255e-08  1.816279e-07   
+    USA      9.580985e+06  1.931647e+07  1.757391e+08  3.170858e-09  4.889913e-07   
+    
+               R65_74    R75_84      R85p        RTotal     Split  SplitSex  \
+    Country                                                                   
+    AUT      0.000027  0.000135  0.000744  8.723239e-07  0.001863  0.000000   
+    BEL      0.000028  0.000168  0.001118  1.372774e-06  0.000000  0.000000   
+    BGR      0.000086  0.000210  0.000930  3.466171e-06  0.000000  0.000000   
+    CHE      0.000016  0.000114  0.000880  7.213835e-07  0.000000  0.000000   
+    CZE      0.000048  0.000173  0.000719  8.301342e-07  0.000000  0.000000   
+    DEUTNP   0.000018  0.000076  0.000483  2.394735e-06  0.000000  0.222534   
+    DNK      0.000016  0.000114  0.000580  7.658798e-07  0.000000  0.000000   
+    ESP      0.000031  0.000158  0.000893  1.768785e-06  0.000000  0.000000   
+    EST      0.000162  0.000407  0.002279  2.769435e-06  0.000000  0.000000   
+    FIN      0.000064  0.000317  0.001056  7.382261e-07  0.000000  0.000000   
+    FRATNP   0.000027  0.000126  0.000818  1.010893e-06  0.000000  0.000000   
+    GBRTENW  0.000011  0.000083  0.000820  1.917328e-06  0.000000  0.000000   
+    GBR_SCO  0.000034  0.000164  0.000940  1.873343e-06  0.000000  0.000000   
+    HRV      0.000081  0.000242  0.001360  1.853903e-06  0.000000  0.000000   
+    HUN      0.000099  0.000251  0.001049  2.018630e-06  0.000000  0.000000   
+    ISL      0.000072  0.000365  0.003485  2.034837e-06  0.000000  0.000000   
+    ISR      0.000022  0.000099  0.000591  4.935359e-07  0.000000  0.000000   
+    ITA      0.000012  0.000085  0.000664  2.410936e-06  0.000000  0.000000   
+    LTU      0.000141  0.000298  0.001357  3.802914e-06  0.000000  0.000000   
+    LUX      0.000072  0.000320  0.003364  2.095027e-06  0.000000  0.000000   
+    LVA      0.000171  0.000386  0.001841  2.904451e-06  0.000000  0.000000   
+    NLD      0.000035  0.000246  0.001175  7.594720e-07  0.158866  0.000500   
+    NOR      0.000022  0.000161  0.000706  1.171390e-06  0.000000  0.000000   
+    POL      0.000080  0.000226  0.000873  1.264326e-06  0.000000  0.000000   
+    PRT      0.000039  0.000234  0.001548  2.985445e-06  0.000000  0.000000   
+    RUS      0.000227  0.000359  0.000875  4.341355e-06  0.000000  0.000000   
+    SVK      0.000103  0.000276  0.001242  1.032817e-06  0.000000  0.000000   
+    SVN      0.000067  0.000258  0.001837  1.352569e-06  0.000000  0.000000   
+    SWE      0.000014  0.000114  0.000599  1.089183e-06  0.000000  0.000000   
+    USA      0.000012  0.000048  0.000201  1.503126e-06  0.000000  0.222409   
+    
+             Forecast  
+    Country            
+    AUT      0.110805  
+    BEL      0.072241  
+    BGR      0.186477  
+    CHE      0.071514  
+    CZE      0.088347  
+    DEUTNP   0.246373  
+    DNK      0.044399  
+    ESP      0.072964  
+    EST      0.111412  
+    FIN      0.049990  
+    FRATNP   0.106488  
+    GBRTENW  0.186477  
+    GBR_SCO  0.110894  
+    HRV      0.049878  
+    HUN      0.197633  
+    ISL      0.072964  
+    ISR      0.072241  
+    ITA      0.248367  
+    LTU      0.110196  
+    LUX      0.107113  
+    LVA      0.112016  
+    NLD      0.059715  
+    NOR      0.072964  
+    POL      0.067838  
+    PRT      0.070052  
+    RUS      0.000000  
+    SVK      0.107734  
+    SVN      0.098797  
+    SWE      0.072964  
+    USA      0.167267  
+
+
+
+```python
+# Just to be thorough, lets check our frequencies.
+freq = Data2.count()
+print(freq)
+```
+
+             Year  Week   Sex  D0_14  D15_64  D65_74  D75_84  D85p  DTotal  R0_14  \
+    Country                                                                         
+    AUT      3216  3216  3216   3216    3216    3216    3216  3216    3216   3216   
+    BEL      3216  3216  3216   3216    3216    3216    3216  3216    3216   3216   
+    BGR      1659  1659  1659   1659    1659    1659    1659  1659    1659   1659   
+    CHE      3213  3213  3213   3213    3213    3213    3213  3213    3213   3213   
+    CZE      2421  2421  2421   2421    2421    2421    2421  2421    2421   2421   
+    DEUTNP    714   714   714    714     714     714     714   714     714    714   
+    DNK      2127  2127  2127   2127    2127    2127    2127  2127    2127   2127   
+    ESP      3219  3219  3219   3219    3219    3219    3219  3219    3219   3219   
+    EST      3219  3219  3219   3219    3219    3219    3219  3219    3219   3219   
+    FIN      4776  4776  4776   4776    4776    4776    4776  4776    4776   4776   
+    FRATNP   3195  3195  3195   3195    3195    3195    3195  3195    3195   3195   
+    GBRTENW  1659  1659  1659   1659    1659    1659    1659  1659    1659   1659   
+    GBR_SCO  3213  3213  3213   3213    3213    3213    3213  3213    3213   3213   
+    HRV      2964  2964  2964   2964    2964    2964    2964  2964    2964   2964   
+    HUN      3210  3210  3210   3210    3210    3210    3210  3210    3210   3210   
+    ISL      3219  3219  3219   3219    3219    3219    3219  3219    3219   3219   
+    ISR      3216  3216  3216   3216    3216    3216    3216  3216    3216   3216   
+    ITA       855   855   855    855     855     855     855   855     855    855   
+    LTU      3213  3213  3213   3213    3213    3213    3213  3213    3213   3213   
+    LUX      3198  3198  3198   3198    3198    3198    3198  3198    3198   3198   
+    LVA      3222  3222  3222   3222    3222    3222    3222  3222    3222   3222   
+    NLD      3999  3999  3999   3999    3999    3999    3999  3999    3999   3999   
+    NOR      3219  3219  3219   3219    3219    3219    3219  3219    3219   3219   
+    POL      3198  3198  3198   3198    3198    3198    3198  3198    3198   3198   
+    PRT      3207  3207  3207   3207    3207    3207    3207  3207    3207   3207   
+    RUS      2964  2964  2964   2964    2964    2964    2964  2964    2964   2964   
+    SVK      3201  3201  3201   3201    3201    3201    3201  3201    3201   3201   
+    SVN      3159  3159  3159   3159    3159    3159    3159  3159    3159   3159   
+    SWE      3219  3219  3219   3219    3219    3219    3219  3219    3219   3219   
+    USA      1188  1188  1188   1188    1188    1188    1188  1188    1188   1188   
+    
+             R15_64  R65_74  R75_84  R85p  RTotal  Split  SplitSex  Forecast  
+    Country                                                                   
+    AUT        3216    3216    3216  3216    3216   3216      3216      3216  
+    BEL        3216    3216    3216  3216    3216   3216      3216      3216  
+    BGR        1659    1659    1659  1659    1659   1659      1659      1659  
+    CHE        3213    3213    3213  3213    3213   3213      3213      3213  
+    CZE        2421    2421    2421  2421    2421   2421      2421      2421  
+    DEUTNP      714     714     714   714     714    714       714       714  
+    DNK        2127    2127    2127  2127    2127   2127      2127      2127  
+    ESP        3219    3219    3219  3219    3219   3219      3219      3219  
+    EST        3219    3219    3219  3219    3219   3219      3219      3219  
+    FIN        4776    4776    4776  4776    4776   4776      4776      4776  
+    FRATNP     3195    3195    3195  3195    3195   3195      3195      3195  
+    GBRTENW    1659    1659    1659  1659    1659   1659      1659      1659  
+    GBR_SCO    3213    3213    3213  3213    3213   3213      3213      3213  
+    HRV        2964    2964    2964  2964    2964   2964      2964      2964  
+    HUN        3210    3210    3210  3210    3210   3210      3210      3210  
+    ISL        3219    3219    3219  3219    3219   3219      3219      3219  
+    ISR        3216    3216    3216  3216    3216   3216      3216      3216  
+    ITA         855     855     855   855     855    855       855       855  
+    LTU        3213    3213    3213  3213    3213   3213      3213      3213  
+    LUX        3198    3198    3198  3198    3198   3198      3198      3198  
+    LVA        3222    3222    3222  3222    3222   3222      3222      3222  
+    NLD        3999    3999    3999  3999    3999   3999      3999      3999  
+    NOR        3219    3219    3219  3219    3219   3219      3219      3219  
+    POL        3198    3198    3198  3198    3198   3198      3198      3198  
+    PRT        3207    3207    3207  3207    3207   3207      3207      3207  
+    RUS        2964    2964    2964  2964    2964   2964      2964      2964  
+    SVK        3201    3201    3201  3201    3201   3201      3201      3201  
+    SVN        3159    3159    3159  3159    3159   3159      3159      3159  
+    SWE        3219    3219    3219  3219    3219   3219      3219      3219  
+    USA        1188    1188    1188  1188    1188   1188      1188      1188  
+
+
+
+```python
+
+```
